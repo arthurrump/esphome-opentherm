@@ -15,18 +15,19 @@ OpenThermComponent* otComponent;
 void IRAM_ATTR handleInterrupt();
 void processResponse(unsigned long response, OpenThermResponseStatus status);
 
-//  FloatOutput that is also a Number
-class NumberOutput : public FloatOutput, public Number {
+//  FloatOutput that simply stores its state and makes it available through a getter
+class StoredFloatOutput : public FloatOutput {
 protected:
+    float state;
+    const char* name;
     void write_state(float state) override { 
-        this->publish_state(state);
-    }
-    void control(float value) override {
-        this->publish_state(value);
+        ESP_LOGD("StoredFloatOutput", "Set %s state to %.2f", this->name, state);
+        this->state = state;
     }
 public:
-    NumberOutput (float state = 0) {
-        this->state = state;
+    StoredFloatOutput (const char* name, float state = 0) : state(state) {}
+    float get_state() { 
+        return this->state; 
     }
 };
 
@@ -56,7 +57,7 @@ protected:
     byte currentRequestIndex;
 
 public:
-    NumberOutput* flowTempSetpointOutput = new NumberOutput();
+    StoredFloatOutput* flowTempSetpointOutput = new StoredFloatOutput("flowTempSetpoint");
     Sensor* flowTempSensor = new Sensor();
     Sensor* returnTempSensor = new Sensor();
     Sensor* relModLevelSensor = new Sensor();
@@ -86,11 +87,11 @@ protected:
         byte id = requests[requestIndex];
         switch (id) {
             case OpenThermMessageID::Status:
-                ESP_LOGD(TAG, "Building Status request with enableHeating=", enableHeating, ", enableHotWater=", enableHotWater, ", enableCooling=", enableCooling);
+                ESP_LOGD(TAG, "Building Status request with enableHeating=%d, enableHotWater=%d, enableCooling=%d", enableHeating, enableHotWater, enableCooling);
                 return ot->buildSetBoilerStatusRequest(enableHeating, enableHotWater, enableCooling);
             case OpenThermMessageID::TSet:
-                ESP_LOGD(TAG, "Building TSet request to set target temperature at ", flowTempSetpointOutput->state);
-                return ot->buildSetBoilerTemperatureRequest(flowTempSetpointOutput->state);
+                ESP_LOGD(TAG, "Building TSet request to set target temperature at %.1f", flowTempSetpointOutput->get_state());
+                return ot->buildSetBoilerTemperatureRequest(flowTempSetpointOutput->get_state());
             case OpenThermMessageID::Tboiler:
                 ESP_LOGD(TAG, "Building Tboiler request to request boiler flow temperature");
                 return ot->buildRequest(OpenThermMessageType::READ, OpenThermMessageID::Tboiler, 0);
@@ -109,9 +110,8 @@ public:
         if (!ot->isValidResponse(response)) {
             ESP_LOGW(
                 TAG, 
-                "Received invalid OpenTherm response: ", 
+                "Received invalid OpenTherm response: %s, status=%s", 
                 String(response, HEX).c_str(),
-                ", status=", 
                 String(ot->getLastResponseStatus()).c_str()
             );
             return;
@@ -122,7 +122,7 @@ public:
         switch (id) {
             // Response to a status request
             case OpenThermMessageID::Status:
-                ESP_LOGD(TAG, "Received OpenTherm Status response: ", String(response, HEX).c_str());
+                ESP_LOGD(TAG, "Received OpenTherm Status response: %s", String(response, HEX).c_str());
                 isFlameOnSensor->publish_state(ot->isFlameOn(response));
                 isCentralHeatingActiveSensor->publish_state(ot->isCentralHeatingActive(response));
                 isHotWaterActiveSensor->publish_state(ot->isHotWaterActive(response));
@@ -132,34 +132,33 @@ public:
                 break;
             // Response to the request to set the boiler flow temperature
             case OpenThermMessageID::TSet:
-                ESP_LOGD(TAG, "Received OpenTherm TSet response: ", String(response, HEX).c_str());
+                ESP_LOGD(TAG, "Received OpenTherm TSet response: %s", String(response, HEX).c_str());
                 res = (response & 0xFFFF) / 256.0;
-                ESP_LOGD(TAG, "TSet response temperature: ", res);
-                flowTempSetpointOutput->publish_state(res);
+                ESP_LOGD(TAG, "TSet response temperature: %.1f", res);
                 break;
             // Response to a request for the actual current flow temperature
             case OpenThermMessageID::Tboiler:
-                ESP_LOGD(TAG, "Received OpenTherm Tboiler response: ", String(response, HEX).c_str());
+                ESP_LOGD(TAG, "Received OpenTherm Tboiler response: %s", String(response, HEX).c_str());
                 res = (response & 0xFFFF) / 256.0;
-                ESP_LOGD(TAG, "Tboiler response temperature: ", res);
+                ESP_LOGD(TAG, "Tboiler response temperature: %.1f", res);
                 flowTempSensor->publish_state(res);
                 break;
             // Response to a request for the current return flow temperature
             case OpenThermMessageID::Tret:
-                ESP_LOGD(TAG, "Received OpenTherm Tret response: ", String(response, HEX).c_str());
+                ESP_LOGD(TAG, "Received OpenTherm Tret response: %s", String(response, HEX).c_str());
                 res = (response & 0xFFFF) / 256.0;
-                ESP_LOGD(TAG, "Tret response temperature: ", res);
+                ESP_LOGD(TAG, "Tret response temperature: %.1f", res);
                 returnTempSensor->publish_state(res);
                 break;
             // Response to a request for the relative modulation level
             case OpenThermMessageID::RelModLevel:
-                ESP_LOGD(TAG, "Received OpenTherm RelModLevel response: ", String(response, HEX).c_str());
+                ESP_LOGD(TAG, "Received OpenTherm RelModLevel response: %s", String(response, HEX).c_str());
                 res = (response & 0xFFFF) / 256.0;
-                ESP_LOGD(TAG, "RelModLevel response level: ", res, "%");
+                ESP_LOGD(TAG, "RelModLevel response level: %.1f%%", res);
                 relModLevelSensor->publish_state(res);
                 break;
             default:
-                ESP_LOGW(TAG, "Received unexpected response with id ", id, ": ", String(response, HEX).c_str());
+                ESP_LOGW(TAG, "Received unexpected response with id %d: %s", id, String(response, HEX).c_str());
                 break;
         }
     }
@@ -183,7 +182,7 @@ public:
         if (ot->isReady()) {
             unsigned int request = buildRequest(currentRequestIndex);
             ot->sendRequestAync(request);
-            ESP_LOGD(TAG, "Sent request ", String(request, HEX).c_str(), " over OpenTherm");
+            ESP_LOGD(TAG, "Sent request %s over OpenTherm", String(request, HEX).c_str());
             currentRequestIndex = currentRequestIndex + 1 % requestsCount;
             ot->process();
         }
@@ -211,45 +210,3 @@ void processResponse(unsigned long response, OpenThermResponseStatus status) {
         otComponent->processResponse(response, status);
     }
 }
-
-class BoilerFlowClimate : public Component, public Climate {
-protected:
-    const OpenThermComponent* otc;
-    float oldTargetTemp = 0;
-
-public:
-    BoilerFlowClimate(OpenThermComponent* otc) : otc(otc) {}
-
-    void setup() override {
-        otc->flowTempSensor->add_on_state_callback([this](float state) {
-            this->current_temperature = state;
-        });
-
-        otc->isFlameOnSensor->add_on_state_callback([this](bool state) {
-            this->mode = state ? climate::CLIMATE_MODE_HEAT : climate::CLIMATE_MODE_OFF;
-        });
-    }
-
-    void control(const ClimateCall &call) override {
-        if (call.get_mode().has_value()) {
-            auto mode = *call.get_mode();
-            if (mode == climate::CLIMATE_MODE_OFF) {
-                otc->flowTempSetpointOutput->publish_state(0);
-            } else if (mode == climate::CLIMATE_MODE_HEAT) {
-                otc->flowTempSetpointOutput->publish_state(oldTargetTemp);
-            }
-        }
-        if (call.get_target_temperature().has_value()) {
-            float temp = *call.get_target_temperature();
-            otc->flowTempSetpointOutput->publish_state(temp);
-            oldTargetTemp = temp;
-        }
-    }
-
-    ClimateTraits traits() override {
-        auto traits = climate::ClimateTraits();
-        traits.set_supports_current_temperature(true);
-        traits.add_supported_mode(climate::CLIMATE_MODE_HEAT);
-        return traits;
-    }
-};

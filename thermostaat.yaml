@@ -60,6 +60,17 @@ output:
       return { otc->flowTempSetpointOutput };
     outputs:
       - id: flowTempSetpoint
+  - platform: template
+    id: pid_output
+    type: float
+    write_action: 
+      then:
+        - logger.log:
+            format: "Received PID output: %.2f"
+            args: [ !lambda "state" ]
+        - output.set_level: 
+            id: flowTempSetpoint
+            level: !lambda "return state == 0.0 ? 0.0 : (state * 20.0 + 20.0);"
 
 binary_sensor:
   - platform: custom
@@ -106,14 +117,20 @@ sensor:
         unit_of_measurement: "%"
         accuracy_decimals: 0
 
-number:
+  - platform: homeassistant
+    entity_id: sensor.aanbouw_temperatuur
+    id: external_temperature
 
 climate:
-  - platform: custom
-    lambda: |-
-      OpenThermComponent *otc = (OpenThermComponent*) opentherm;
-      auto boilerFlowClimate = new BoilerFlowClimate(otc);
-      App.register_component(boilerFlowClimate);
-      return { boilerFlowClimate };
-    climates: 
-      - name: "CV Watertemperatuur Klimaat"
+  - platform: pid
+    name: "Thermostaat"
+    heat_output: pid_output
+    sensor: external_temperature
+    default_target_temperature: 19
+    visual: 
+      min_temperature: 14
+      max_temperature: 25
+      temperature_step: 0.5
+    control_parameters: 
+      kp: 30
+      ki: 0.02
