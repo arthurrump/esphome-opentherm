@@ -3,8 +3,12 @@ esphome:
   platformio_options: 
     lib_deps:
     - ihormelnyk/OpenTherm Library @ 1.1.3
-  includes:
-    - OpenTherm/
+
+external_components:
+  source: 
+    type: local
+    path: .
+  components: [ opentherm ]
 
 esp8266:
   board: d1_mini
@@ -45,92 +49,5 @@ status_led:
 #     address: 0x8b3c6af64987a428
 #     name: "Temperatuur"
 
-custom_component:
-  - lambda: |-
-      auto opentherm = new OpenThermComponent(D2, D1, true, true, false);
-      return { opentherm };
-    components:
-      - id: opentherm
-
-output:
-  - platform: custom
-    type: float
-    lambda: |-
-      OpenThermComponent *otc = (OpenThermComponent*) opentherm;   
-      return { otc->flowTempSetpointOutput };
-    outputs:
-      - id: flowTempSetpoint
-  - platform: template
-    id: pid_output
-    type: float
-    write_action: 
-      then:
-        - logger.log:
-            format: "Received PID output: %.2f"
-            args: [ !lambda "state" ]
-        - output.set_level: 
-            id: flowTempSetpoint
-            level: !lambda "return state == 0.0 ? 0.0 : (state * 20.0 + 20.0);"
-
-binary_sensor:
-  - platform: custom
-    lambda: |-
-      OpenThermComponent *otc = (OpenThermComponent*) opentherm;   
-      return { 
-        otc->isFlameOnSensor,
-        otc->isCentralHeatingActiveSensor,
-        otc->isHotWaterActiveSensor,
-        otc->isCoolingActiveSensor,
-        otc->hasFaultSensor,
-        otc->hasDiagnosticSensor 
-      };
-    binary_sensors: 
-      - name: "Vlam"
-        device_class: heat
-      - name: "CV actief"
-        device_class: heat
-      - name: "Warm water actief"
-      - name: "Koeling actief"
-        device_class: cold
-      - name: "Fout"
-        device_class: problem
-      - name: "Diagnostische informatie beschikbaar"
-        device_class: problem
-
-sensor:
-  - platform: custom
-    lambda: |-
-      OpenThermComponent *otc = (OpenThermComponent*) opentherm;   
-      return { 
-        otc->flowTempSensor,
-        otc->returnTempSensor,
-        otc->relModLevelSensor
-      };
-    sensors:
-      - name: "CV Watertemperatuur"
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-      - name: "CV Retourtemperatuur"
-        unit_of_measurement: "°C"
-        accuracy_decimals: 1
-      - name: "CV Modulatie"
-        unit_of_measurement: "%"
-        accuracy_decimals: 0
-
-  - platform: homeassistant
-    entity_id: sensor.aanbouw_temperatuur
-    id: external_temperature
-
-climate:
-  - platform: pid
-    name: "Thermostaat"
-    heat_output: pid_output
-    sensor: external_temperature
-    default_target_temperature: 19
-    visual: 
-      min_temperature: 14
-      max_temperature: 25
-      temperature_step: 0.5
-    control_parameters: 
-      kp: 30
-      ki: 0.02
+opentherm:
+  id: othub
