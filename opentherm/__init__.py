@@ -32,6 +32,10 @@ def cv_inputs_schema(get_validator):
         schema[cv.Optional(key)] = get_validator(key)
     return cv.Schema(schema)
 
+def cg_write_read_input_defines(keys, sensor_type):
+    for key in keys:
+        cg.add_define("OPENTHERM_READ_INPUT_" + key, cg.RawExpression(f"this->{key}_{sensor_type}->state"))
+
 CONF_OPENTHERM_ID = "opentherm_id"
 
 opentherm_ns = cg.esphome_ns.namespace("esphome::opentherm")
@@ -84,5 +88,6 @@ async def to_code(config):
     if len(input_sensors) > 0:
         cg_write_component_defines("INPUT_SENSOR", input_sensors)
         cg_write_required_messages(var, input_required_messages(input_sensors))
+        cg_write_read_input_defines(input_sensors, "input_sensor")
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.3")

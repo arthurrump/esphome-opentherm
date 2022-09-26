@@ -17,10 +17,6 @@ int8_t get_low_s8(unsigned long response) {
     return (int8_t) ((response >> 8) & 0xff);
 }
 
-float OpenthermHub::get_t_set_input(byte request_id) {
-    return 0.0;
-}
-
 void OpenthermHub::set_output_max_setpoint(float max_setpoint) {
 #define OPENTHERM_SET_OUTPUT_MAX_SETPOINT(output) \
     if (this->output ## _output != nullptr && this->output ## _output->auto_max_power) { \
@@ -34,9 +30,14 @@ unsigned int OpenthermHub::build_request(byte request_id) {
         case OpenThermMessageID::Status:
             ESP_LOGD(TAG, "Building Status request");
             return ot->buildSetBoilerStatusRequest(this->ch_enable, this->dhw_enable, this->cooling_enable, this->otc_active, this->ch2_active);
-        case OpenThermMessageID::TSet:
+        case OpenThermMessageID::TSet: {
+            float target_temp = OPENTHERM_READ_INPUT_t_set;
+            ESP_LOGD(TAG, "Building request to set target temperature at %.1f", target_temp);
+            unsigned int data = ot->temperatureToData(target_temp);
+            return ot->buildRequest(OpenThermMessageType::WRITE_DATA, (OpenThermMessageID)request_id, data);
+        }
         case OpenThermMessageID::TsetCH2: {
-            float target_temp = this->get_t_set_input(request_id);
+            float target_temp = OPENTHERM_READ_INPUT_t_set_ch2;
             ESP_LOGD(TAG, "Building request to set target temperature at %.1f", target_temp);
             unsigned int data = ot->temperatureToData(target_temp);
             return ot->buildRequest(OpenThermMessageType::WRITE_DATA, (OpenThermMessageID)request_id, data);

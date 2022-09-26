@@ -3,7 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import output
 from esphome.const import CONF_ID
 
-from . import cv_inputs_schema, input_required_messages
+from . import cg_write_read_input_defines, cv_inputs_schema, input_required_messages
 from . import CONF_OPENTHERM_ID, OpenthermHub, opentherm_ns, cg_write_component_defines, cg_write_required_messages
 
 DEPENDENCIES = [ "opentherm" ]
@@ -45,3 +45,4 @@ async def to_code(config):
 
     cg_write_required_messages(hub, input_required_messages(keys))    
     cg_write_component_defines("OUTPUT", keys)
+    cg_write_read_input_defines(keys, "output")

@@ -24,7 +24,6 @@ public:
     };
 
     bool has_state() { return this->has_state_; };
-    float get_state() { return this->state; };
 
     // Use auto_max_power to automatically set the maximum power for this
     // component to the maximum allowable setpoint temperature reported by the
