@@ -26,9 +26,11 @@ protected:
     // The OpenTherm interface from @ihormelnyk's library
     OpenTherm* ot;
 
-    // List of sensors and binary sensors that have been added to the hub
-    std::unordered_map<OpenthermSensorType, sensor::Sensor*> sensors;
-    std::unordered_map<OpenthermBinarySensorType, binary_sensor::BinarySensor*> binary_sensors;
+    #define OPENTHERM_DECLARE_SENSOR(s) sensor::Sensor* s ## _sensor;
+    OPENTHERM_SENSOR_LIST(OPENTHERM_DECLARE_SENSOR, )
+
+    #define OPENTHERM_DECLARE_BINARY_SENSOR(s) binary_sensor::BinarySensor* s ## _binary_sensor;
+    OPENTHERM_BINARY_SENSOR_LIST(OPENTHERM_DECLARE_BINARY_SENSOR, )
 
     // The set of initial requests to make on starting communication with the boiler
     std::unordered_set<byte> initial_requests;
@@ -46,23 +48,18 @@ protected:
     // for example from a PID climate controller
     // This also requires providing the min_t_set and max_t_set values, or setting the
     // option to request the latter from the boiler.
-    RelativeSetpoint* t_set_input_relative;
+    SetpointOutput* t_set_input_relative;
     // 3. By setting a number which provides the current temperature setpoint
     number::Number* t_set_input_number;
 
     // This method returns the current setpoint, or 0.0 is no setpoint is set
     // If more than one input is configured, the first one takes precedence
-    float get_t_set_input();
+    float get_t_set_input(byte request_id);
 
     // There are five status variables, which can either be set as a simple variable,
     // or as a switch. ch_enable and dhw_enable default to true, the others to false.
     bool ch_enable = true, dhw_enable = false, cooling_enable, otc_active, ch2_active;
     std::vector<OpenthermSwitch*> switches;
-
-    // The minimum and maximum temperature setpoints, only used with the relative setpoint
-    optional<float> min_t_set, max_t_set;
-    // If true, the max_t_set value is requested from the boiler
-    bool request_max_t_set;
 
     // Helper methods to publish a state to a sensor or binary sensor
     // of a certain type, if it has been registered with the hub
@@ -90,9 +87,11 @@ public:
     void set_in_pin(int in_pin) { this->in_pin = in_pin; }
     void set_out_pin(int out_pin) { this->out_pin = out_pin; }
 
-    // Methods to register sensors and binary sensors
-    void register_sensor(OpenthermSensorType type, sensor::Sensor* sensor);
-    void register_binary_sensor(OpenthermBinarySensorType type, binary_sensor::BinarySensor* binary_sensor);
+    #define OPENTHERM_SET_SENSOR(s) void set_ ## s ## _sensor(sensor::Sensor* sensor) { this->s ## _sensor = sensor; }
+    OPENTHERM_SENSOR_LIST(OPENTHERM_SET_SENSOR, )
+
+    #define OPENTHERM_SET_BINARY_SENSOR(s) void set_ ## s ## _binary_sensor(binary_sensor::BinarySensor* binary_sensor) { this->s ## _binary_sensor = binary_sensor; }
+    OPENTHERM_BINARY_SENSOR_LIST(OPENTHERM_SET_BINARY_SENSOR, )
 
     // Add a request to the set of initial requests
     void add_initial_request(byte request) { this->initial_requests.insert(request); }
@@ -104,7 +103,7 @@ public:
 
     // Setters for the inputs that control the boiler setpoint temperature
     void set_t_set_input_sensor(sensor::Sensor* t_set_input_sensor) { this->t_set_input_sensor = t_set_input_sensor; }
-    void set_t_set_input_relative(RelativeSetpoint* t_set_input_relative) { this->t_set_input_relative = t_set_input_relative; }
+    void set_t_set_input_relative(SetpointOutput* t_set_input_relative) { this->t_set_input_relative = t_set_input_relative; }
     void set_t_set_input_number(number::Number* t_set_input_number) { this->t_set_input_number = t_set_input_number; }
 
     // Setters for the status variables
@@ -116,14 +115,6 @@ public:
 
     // Method to register switches
     void register_switch(OpenthermSwitch* sw);
-
-    // Setters for the fields related to min/max setpoint temperatures
-    void set_min_t_set(float min_t_set) { this->min_t_set = optional(min_t_set); }
-    void set_max_t_set(float max_t_set) { this->max_t_set = optional(max_t_set); }
-    void set_request_max_t_set(bool request_max_t_set) { 
-        this->request_max_t_set = request_max_t_set;
-        this->add_repeating_request(OpenThermMessageID::MaxTSet);
-    }
     
     float get_setup_priority() const override{
         return setup_priority::HARDWARE;

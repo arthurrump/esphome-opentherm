@@ -1,3 +1,4 @@
+from xmlrpc.client import boolean
 import esphome.codegen as cg
 import esphome.cpp_generator as cpp
 import esphome.config_validation as cv
@@ -6,15 +7,40 @@ from esphome.const import CONF_ID
 AUTO_LOAD = [ 'binary_sensor', 'sensor', 'switch', 'number', 'output' ]
 MULTI_CONF = True
 
-CONF_HUB_ID = "opentherm"
 CONF_OPENTHERM_ID = "opentherm_id"
 
 opentherm_ns = cg.esphome_ns.namespace("esphome::opentherm")
 OpenthermHub = opentherm_ns.class_("OpenthermHub", cg.Component)
 
-CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(OpenthermHub)
-}).extend(cv.COMPONENT_SCHEMA)
+CONFIG_SCHEMA = cv.All(
+    cv.Schema({
+        cv.GenerateID(): cv.declare_id(OpenthermHub),
+        cv.Optional("in_pin", 4): cv.int_,
+        cv.Optional("out_pin", 5): cv.int_,
+        cv.Optional("ch_enable", True): cv.boolean,
+        cv.Optional("dhw_enable", True): cv.boolean,
+        cv.Optional("cooling_enable", False): cv.boolean,
+        cv.Optional("otc_active", False): cv.boolean,
+        cv.Optional("ch2_active", False): cv.boolean,
+        cv.Optional("min_t_set", 0): cv.float_range(0, 100),
+        cv.Optional("max_t_set", 100): cv.float_range(0, 100),
+        cv.Optional("request_max_t_set", False): cv.boolean,
+    }).extend(cv.COMPONENT_SCHEMA),
+    cv.only_with_arduino,
+)
+
+def cg_write_component_defines(component, keys):
+    cg.add_define(
+        f"OPENTHERM_{component}_LIST(F, sep)", 
+        cg.RawExpression(" sep ".join(map(lambda key: f"F({key})", keys)))
+    )
+    for key in keys:
+        cg.add_define(f"OPENTHERM_HAS_{component}_{key}")
+
+def cg_write_required_messages(hub, messages):
+    for (repeat, message) in messages:
+        add = "add_repeating_request" if repeat else "add_initial_request"
+        cg.add(getattr(hub, add)(cg.RawExpression(f"OpenThermMessageID::{message}")))
 
 async def to_code(config):
     id = str(config[CONF_ID])

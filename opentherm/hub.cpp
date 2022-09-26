@@ -3,7 +3,7 @@
 namespace esphome {
 namespace opentherm {
 
-static const char *TAG = "opentherm.hub";
+static const char *TAG = "opentherm";
 
 int16_t get_s16(unsigned long response) {
     return (int16_t) (response & 0xffff);
@@ -17,7 +17,7 @@ int8_t get_low_s8(unsigned long response) {
     return (int8_t) ((response >> 8) & 0xff);
 }
 
-float OpenthermHub::get_t_set_input() {
+float OpenthermHub::get_t_set_input(byte request_id) {
     if (this->t_set_input_sensor != nullptr) {
         return this->t_set_input_sensor->has_state() ? this->t_set_input_sensor->state : 0.0;
     } else if (this->t_set_input_relative != nullptr) {
@@ -30,155 +30,17 @@ float OpenthermHub::get_t_set_input() {
 }
 
 void OpenthermHub::publish_to_sensor(OpenthermSensorType type, float state) {
-    auto got = this->sensors.find(type);
-    if (got != this->sensors.end()) {
-        got->second->publish_state(state);
-    }
+    // auto got = this->sensors.find(type);
+    // if (got != this->sensors.end()) {
+    //     got->second->publish_state(state);
+    // }
 }
 
 void OpenthermHub::publish_to_binary_sensor(OpenthermBinarySensorType type, bool state) {
-    auto got = this->binary_sensors.find(type);
-    if (got != this->binary_sensors.end()) {
-        got->second->publish_state(state);
-    }
-}
-
-void OpenthermHub::register_sensor(OpenthermSensorType type, sensor::Sensor* sensor) {
-    if (this->sensors[type] == nullptr) {
-        ESP_LOGW(TAG, "A sensor for type %s has already been registerd. Only the last registration will be used.", type);
-    }
-
-    this->sensors[type] = sensor;
-    switch (type) {
-        case OpenthermSensorType::rel_mod_level:
-            this->add_repeating_request(OpenThermMessageID::RelModLevel);
-            break;
-        case OpenthermSensorType::ch_pressure:
-            this->add_repeating_request(OpenThermMessageID::CHPressure);
-            break;
-        case OpenthermSensorType::dhw_flow_rate:
-            this->add_repeating_request(OpenThermMessageID::DHWFlowRate);
-            break;
-        case OpenthermSensorType::t_boiler:
-            this->add_repeating_request(OpenThermMessageID::Tboiler);
-            break;
-        case OpenthermSensorType::t_dhw:
-            this->add_repeating_request(OpenThermMessageID::Tdhw);
-            break;
-        case OpenthermSensorType::t_outside:
-            this->add_repeating_request(OpenThermMessageID::Toutside);
-            break;
-        case OpenthermSensorType::t_ret:
-            this->add_repeating_request(OpenThermMessageID::Tret);
-            break;
-        case OpenthermSensorType::t_storage:
-            this->add_repeating_request(OpenThermMessageID::Tstorage);
-            break;
-        case OpenthermSensorType::t_collector:
-            this->add_repeating_request(OpenThermMessageID::Tcollector);
-            break;
-        case OpenthermSensorType::t_flow_ch2:
-            this->add_repeating_request(OpenThermMessageID::TflowCH2);
-            break;
-        case OpenthermSensorType::t_dhw2:
-            this->add_repeating_request(OpenThermMessageID::Tdhw2);
-            break;
-        case OpenthermSensorType::t_exhaust:
-            this->add_repeating_request(OpenThermMessageID::Texhaust);
-            break;
-        case OpenthermSensorType::burner_starts:
-            this->add_repeating_request(OpenThermMessageID::BurnerStarts);
-            break;
-        case OpenthermSensorType::ch_pump_starts:
-            this->add_repeating_request(OpenThermMessageID::CHPumpStarts);
-            break;
-        case OpenthermSensorType::dhw_pump_valve_starts:
-            this->add_repeating_request(OpenThermMessageID::DHWPumpValveStarts);
-            break;
-        case OpenthermSensorType::dhw_burner_starts:
-            this->add_repeating_request(OpenThermMessageID::DHWBurnerStarts);
-            break;
-        case OpenthermSensorType::burner_operation_hours:
-            this->add_repeating_request(OpenThermMessageID::BurnerOperationHours);
-            break;
-        case OpenthermSensorType::ch_pump_operation_hours:
-            this->add_repeating_request(OpenThermMessageID::CHPumpOperationHours);
-            break;
-        case OpenthermSensorType::dhw_pump_valve_operation_hours:
-            this->add_repeating_request(OpenThermMessageID::DHWPumpValveOperationHours);
-            break;
-        case OpenthermSensorType::dhw_burner_operation_hours:
-            this->add_repeating_request(OpenThermMessageID::DHWBurnerOperationHours);
-            break;
-        case OpenthermSensorType::t_dhw_set_ub:
-        case OpenthermSensorType::t_dhw_set_lb:
-            this->add_initial_request(OpenThermMessageID::TdhwSetUBTdhwSetLB);
-            break;
-        case OpenthermSensorType::max_t_set_ub:
-        case OpenthermSensorType::max_t_set_lb:
-            this->add_initial_request(OpenThermMessageID::MaxTSetUBMaxTSetLB);
-            break;
-        case OpenthermSensorType::t_dhw_set:
-            this->add_repeating_request(OpenThermMessageID::TdhwSet);
-            break;
-        case OpenthermSensorType::max_t_set:
-            this->add_repeating_request(OpenThermMessageID::MaxTSet);
-            break;
-    }
-}
-
-void OpenthermHub::register_binary_sensor(OpenthermBinarySensorType type, binary_sensor::BinarySensor* sensor) {
-    if (this->binary_sensors[type] == nullptr) {
-        ESP_LOGW(TAG, "A sensor for type %s has already been registerd. Only the last registration will be used.", type);
-    }
-
-    this->binary_sensors[type] = sensor;
-    switch (type) {
-        case OpenthermBinarySensorType::fault_indication:
-        case OpenthermBinarySensorType::ch_active:
-        case OpenthermBinarySensorType::dhw_active:
-        case OpenthermBinarySensorType::flame_on:
-        case OpenthermBinarySensorType::cooling_active:
-        case OpenthermBinarySensorType::ch2_active:
-        case OpenthermBinarySensorType::diagnostic_indication:
-            this->add_repeating_request(OpenThermMessageID::Status);
-            break;
-        case OpenthermBinarySensorType::dhw_present:
-        case OpenthermBinarySensorType::control_type_on_off:
-        case OpenthermBinarySensorType::cooling_supported:
-        case OpenthermBinarySensorType::dhw_storage_tank:
-        case OpenthermBinarySensorType::master_pump_control_allowed:
-        case OpenthermBinarySensorType::ch2_present:
-            this->add_initial_request(OpenThermMessageID::SConfigSMemberIDcode);
-            break;
-        case OpenthermBinarySensorType::dhw_setpoint_transfer_enabled:
-        case OpenthermBinarySensorType::max_ch_setpoint_transfer_enabled:
-        case OpenthermBinarySensorType::dhw_setpoint_rw:
-        case OpenthermBinarySensorType::max_ch_setpoint_rw:
-            this->add_initial_request(OpenThermMessageID::RBPflags);
-            break;
-    }
-}
-
-void OpenthermHub::register_switch(OpenthermSwitch* sw) {
-    this->switches.push_back(sw);
-    switch (sw->type) {
-        case OpenthermSwitchType::ch_enable:
-            sw->add_on_state_callback([this](bool state) { this->set_ch_enable(state); });
-            break;
-        case OpenthermSwitchType::dhw_enable:
-            sw->add_on_state_callback([this](bool state) { this->set_dhw_enable(state); });
-            break;
-        case OpenthermSwitchType::cooling_enable:
-            sw->add_on_state_callback([this](bool state) { this->set_cooling_enable(state); });
-            break;
-        case OpenthermSwitchType::otc_active:
-            sw->add_on_state_callback([this](bool state) { this->set_otc_active(state); });
-            break;
-        case OpenthermSwitchType::ch2_active:
-            sw->add_on_state_callback([this](bool state) { this->set_ch2_active(state); });
-            break;
-    }
+    // auto got = this->binary_sensors.find(type);
+    // if (got != this->binary_sensors.end()) {
+    //     got->second->publish_state(state);
+    // }
 }
 
 unsigned int OpenthermHub::build_request(byte request_id) {
@@ -187,8 +49,12 @@ unsigned int OpenthermHub::build_request(byte request_id) {
             ESP_LOGD(TAG, "Building Status request");
             return ot->buildSetBoilerStatusRequest(this->ch_enable, this->dhw_enable, this->cooling_enable, this->otc_active, this->ch2_active);
         case OpenThermMessageID::TSet:
-            ESP_LOGD(TAG, "Building TSet request to set target temperature at %.1f", this->get_t_set_input());
-            return ot->buildSetBoilerTemperatureRequest(this->get_t_set_input());
+        case OpenThermMessageID::TsetCH2: {
+            float target_temp = this->get_t_set_input(request_id);
+            ESP_LOGD(TAG, "Building request to set target temperature at %.1f", target_temp);
+            unsigned int data = ot->temperatureToData(target_temp);
+            return ot->buildRequest(OpenThermMessageType::WRITE_DATA, (OpenThermMessageID)request_id, data);
+        }
         case OpenThermMessageID::RelModLevel:
         case OpenThermMessageID::CHPressure:
         case OpenThermMessageID::DHWFlowRate:
@@ -216,7 +82,7 @@ unsigned int OpenthermHub::build_request(byte request_id) {
         case OpenThermMessageID::SConfigSMemberIDcode:
         case OpenThermMessageID::RBPflags:
             ESP_LOGD(TAG, "Building simple read request with id %d", request_id);
-            return ot->buildRequest(OpenThermMessageType::READ, (OpenThermMessageID)request_id, 0);
+            return ot->buildRequest(OpenThermMessageType::READ_DATA, (OpenThermMessageID)request_id, 0);
     }
     ESP_LOGE(TAG, "Tried to create a request with unknown id %d", request_id);
     return 0;
@@ -256,7 +122,8 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
             this->publish_to_binary_sensor(OpenthermBinarySensorType::diagnostic_indication, ot->isDiagnostic(response));
             break;
         case OpenThermMessageID::TSet:
-            ESP_LOGD(TAG, "TSet response temperature: %.1f", ot->getFloat(response));
+        case OpenThermMessageID::TsetCH2:
+            ESP_LOGD(TAG, "Response temperature: %.1f", ot->getFloat(response));
             break;
         case OpenThermMessageID::RelModLevel:
             this->publish_to_sensor(OpenthermSensorType::rel_mod_level, ot->getFloat(response));
@@ -331,9 +198,9 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
             break;
         case OpenThermMessageID::MaxTSet:
             this->publish_to_sensor(OpenthermSensorType::max_t_set, ot->getFloat(response));
-            if (this->request_max_t_set) {
-                this->max_t_set = optional(ot->getFloat(response));
-            }
+            // if (this->request_max_t_set) {
+            //     this->max_t_set = optional(ot->getFloat(response));
+            // }
             break;
         case OpenThermMessageID::SConfigSMemberIDcode:
             this->publish_to_binary_sensor(OpenthermBinarySensorType::dhw_present, response & 0x1);
@@ -359,6 +226,13 @@ void OpenthermHub::setup() {
     ESP_LOGD(TAG, "Setting up OpenTherm component");
     this->ot = new OpenTherm(this->in_pin, this->out_pin, false);
     this->ot->begin(this->handle_interrupt_callback, this->process_response_callback);
+
+    // Ensure that there is at least one request, as we are required to
+    // communicate at least once every second
+    if (this->repeating_requests.begin() == this->repeating_requests.end()) {
+        this->add_repeating_request(OpenThermMessageID::Status);
+    }
+
     this->current_request_iterator = this->initial_requests.begin();
 }
 
@@ -368,24 +242,40 @@ void OpenthermHub::on_shutdown() {
 
 void OpenthermHub::loop() {
     if (this->ot->isReady()) {
-        unsigned int request = this->build_request(*this->current_request_iterator);
-        this->ot->sendRequestAync(request);
-        ESP_LOGD(TAG, "Sent OpenTherm request: %s", String(request, HEX).c_str());
-        this->current_request_iterator++;
         if (this->initializing && this->current_request_iterator == this->initial_requests.end()) {
             this->initializing = false;
             this->current_request_iterator = this->repeating_requests.begin();
         } else if (this->current_request_iterator == this->repeating_requests.end()) {
             this->current_request_iterator = this->repeating_requests.begin();
         }
+
+        unsigned int request = this->build_request(*this->current_request_iterator);
+        this->ot->sendRequestAync(request);
+        ESP_LOGD(TAG, "Sent OpenTherm request: %s", String(request, HEX).c_str());
+        this->current_request_iterator++;
+        
         this->ot->process();
     }
 }
+
+#define ID(x) x
+#define SHOW2(x) #x
+#define SHOW(x) SHOW2(x)
 
 void OpenthermHub::dump_config() {
     ESP_LOGCONFIG(TAG, "OpenTherm:");
     ESP_LOGCONFIG(TAG, "  In: GPIO%d", this->in_pin);
     ESP_LOGCONFIG(TAG, "  Out: GPIO%d", this->out_pin);
+    ESP_LOGCONFIG(TAG, "  Sensors: %s", SHOW(OPENTHERM_SENSOR_LIST(ID, )));
+    ESP_LOGCONFIG(TAG, "  Binary sensors: %s", SHOW(OPENTHERM_BINARY_SENSOR_LIST(ID, )));
+    ESP_LOGCONFIG(TAG, "  Initial requests:");
+    for (auto type : this->initial_requests) {
+        ESP_LOGCONFIG(TAG, "  - %d", type);
+    }
+    ESP_LOGCONFIG(TAG, "  Repeating requests:");
+    for (auto type : this->repeating_requests) {
+        ESP_LOGCONFIG(TAG, "  - %d", type);
+    }
 }
 
 }  // namespace opentherm
