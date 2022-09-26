@@ -6,18 +6,25 @@
 namespace esphome {
 namespace opentherm {
 
-enum class OpenthermSwitchType {
-    ch_enable,
-    dhw_enable,
-    cooling_enable,
-    otc_active,
-    ch2_active,
+enum OpenthermSwitchMode {
+    OPENTHERM_SWITCH_RESTORE_DEFAULT_ON,
+    OPENTHERM_SWITCH_RESTORE_DEFAULT_OFF,
+    OPENTHERM_SWITCH_START_ON,
+    OPENTHERM_SWITCH_START_OFF
 };
 
 class OpenthermSwitch : public switch_::Switch, public Component {
+protected:
+    bool* value_ref;
+    OpenthermSwitchMode mode;
+
+    void write_state(bool state) override;
+
 public:
-    OpenthermSwitchType type;
-    OpenthermSwitch(OpenthermSwitchType type) : type(type) {}
+    OpenthermSwitch(bool* value_ref) : value_ref(value_ref) {}
+    void set_mode(OpenthermSwitchMode mode) { this->mode = mode; }
+
+    void setup() override;
 };
 
 } // namespace opentherm

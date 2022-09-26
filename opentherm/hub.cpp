@@ -18,29 +18,10 @@ int8_t get_low_s8(unsigned long response) {
 }
 
 float OpenthermHub::get_t_set_input(byte request_id) {
-    if (this->t_set_input_sensor != nullptr) {
-        return this->t_set_input_sensor->has_state() ? this->t_set_input_sensor->state : 0.0;
-    } else if (this->t_set_input_relative != nullptr) {
-        return this->t_set_input_relative->has_state() ? this->t_set_input_relative->state : 0.0;
-    } else if (this->t_set_input_number != nullptr) {
-        return this->t_set_input_number->has_state() ? this->t_set_input_number->state : 0.0;
-    } else {
-        return 0.0;
-    }
+    return 0.0;
 }
 
-void OpenthermHub::publish_to_sensor(OpenthermSensorType type, float state) {
-    // auto got = this->sensors.find(type);
-    // if (got != this->sensors.end()) {
-    //     got->second->publish_state(state);
-    // }
-}
-
-void OpenthermHub::publish_to_binary_sensor(OpenthermBinarySensorType type, bool state) {
-    // auto got = this->binary_sensors.find(type);
-    // if (got != this->binary_sensors.end()) {
-    //     got->second->publish_state(state);
-    // }
+void OpenthermHub::set_output_max_setpoint(float max_setpoint) {
 }
 
 unsigned int OpenthermHub::build_request(byte request_id) {
@@ -96,6 +77,16 @@ void IRAM_ATTR OpenthermHub::handle_interrupt() {
     this->ot->handleInterrupt();
 }
 
+#define OPENTHERM_PUBLISH_SENSOR(name, state) \
+    if (this->name ## _sensor != nullptr) { \
+        this->name ## _sensor->publish_state(state); \
+    }
+
+#define OPENTHERM_PUBLISH_BINARY_SENSOR(name, state) \
+    if (this->name ## _binary_sensor != nullptr) { \
+        this->name ## _binary_sensor->publish_state(state); \
+    }
+
 void OpenthermHub::process_response(unsigned long response, OpenThermResponseStatus status) {
     if (!ot->isValidResponse(response)) {
         ESP_LOGW(
@@ -113,108 +104,192 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
 
     switch (id) {
         case OpenThermMessageID::Status:
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::fault_indication, ot->isFault(response));
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::ch_active, ot->isCentralHeatingActive(response));
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::dhw_active, ot->isHotWaterActive(response));
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::flame_on, ot->isFlameOn(response));
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::cooling_active, ot->isCoolingActive(response));
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::ch2_active, response & 0x20);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::diagnostic_indication, ot->isDiagnostic(response));
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_fault_indication
+            OPENTHERM_PUBLISH_BINARY_SENSOR(fault_indication, ot->isFault(response))
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_ch_active
+            OPENTHERM_PUBLISH_BINARY_SENSOR(ch_active, ot->isCentralHeatingActive(response))
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_active
+            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_active, ot->isHotWaterActive(response))
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_flame_on
+            OPENTHERM_PUBLISH_BINARY_SENSOR(flame_on, ot->isFlameOn(response))
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_cooling_active
+            OPENTHERM_PUBLISH_BINARY_SENSOR(cooling_active, ot->isCoolingActive(response))
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_ch2_active
+            OPENTHERM_PUBLISH_BINARY_SENSOR(ch2_active, response & 0x20)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_diagnostic_indication
+            OPENTHERM_PUBLISH_BINARY_SENSOR(diagnostic_indication, ot->isDiagnostic(response))
+            #endif
             break;
         case OpenThermMessageID::TSet:
         case OpenThermMessageID::TsetCH2:
             ESP_LOGD(TAG, "Response temperature: %.1f", ot->getFloat(response));
             break;
+        #ifdef OPENTHERM_HAS_SENSOR_rel_mod_level
         case OpenThermMessageID::RelModLevel:
-            this->publish_to_sensor(OpenthermSensorType::rel_mod_level, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(rel_mod_level, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_ch_pressure
         case OpenThermMessageID::CHPressure:
-            this->publish_to_sensor(OpenthermSensorType::ch_pressure, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(ch_pressure, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_dhw_flow_rate
         case OpenThermMessageID::DHWFlowRate:
-            this->publish_to_sensor(OpenthermSensorType::dhw_flow_rate, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(dhw_flow_rate, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_boiler
         case OpenThermMessageID::Tboiler:
-            this->publish_to_sensor(OpenthermSensorType::t_boiler, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_boiler, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_dhw
         case OpenThermMessageID::Tdhw:
-            this->publish_to_sensor(OpenthermSensorType::t_dhw, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_dhw, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_outside
         case OpenThermMessageID::Toutside:
-            this->publish_to_sensor(OpenthermSensorType::t_outside, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_outside, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_ret
         case OpenThermMessageID::Tret:
-            this->publish_to_sensor(OpenthermSensorType::t_ret, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_ret, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_storage
         case OpenThermMessageID::Tstorage:
-            this->publish_to_sensor(OpenthermSensorType::t_storage, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_storage, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_collector
         case OpenThermMessageID::Tcollector:
-            this->publish_to_sensor(OpenthermSensorType::t_collector, get_s16(response));
+            OPENTHERM_PUBLISH_SENSOR(t_collector, get_s16(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_flow_ch2
         case OpenThermMessageID::TflowCH2:
-            this->publish_to_sensor(OpenthermSensorType::t_flow_ch2, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_flow_ch2, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_dhw2
         case OpenThermMessageID::Tdhw2:
-            this->publish_to_sensor(OpenthermSensorType::t_dhw2, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_dhw2, ot->getFloat(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_t_exhaust
         case OpenThermMessageID::Texhaust:
-            this->publish_to_sensor(OpenthermSensorType::t_exhaust, get_s16(response));
+            OPENTHERM_PUBLISH_SENSOR(t_exhaust, get_s16(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_burner_starts
         case OpenThermMessageID::BurnerStarts:
-            this->publish_to_sensor(OpenthermSensorType::burner_starts, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(burner_starts, ot->getUInt(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_ch_pump_starts
         case OpenThermMessageID::CHPumpStarts:
-            this->publish_to_sensor(OpenthermSensorType::ch_pump_starts, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(ch_pump_starts, ot->getUInt(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_dhw_pump_valve_starts
         case OpenThermMessageID::DHWPumpValveStarts:
-            this->publish_to_sensor(OpenthermSensorType::dhw_pump_valve_starts, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(dhw_pump_valve_starts, ot->getUInt(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_dhw_burner_starts
         case OpenThermMessageID::DHWBurnerStarts:
-            this->publish_to_sensor(OpenthermSensorType::dhw_burner_starts, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(dhw_burner_starts, ot->getUInt(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_burner_operation_hours
         case OpenThermMessageID::BurnerOperationHours:
-            this->publish_to_sensor(OpenthermSensorType::burner_operation_hours, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(burner_operation_hours, ot->getUInt(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_ch_pump_operation_hours
         case OpenThermMessageID::CHPumpOperationHours:
-            this->publish_to_sensor(OpenthermSensorType::ch_pump_operation_hours, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(ch_pump_operation_hours, ot->getUInt(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_dhw_pump_valve_operation_hours
         case OpenThermMessageID::DHWPumpValveOperationHours:
-            this->publish_to_sensor(OpenthermSensorType::dhw_pump_valve_operation_hours, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(dhw_pump_valve_operation_hours, ot->getUInt(response))
             break;
+        #endif
+        #ifdef OPENTHERM_HAS_SENSOR_dhw_burner_operation_hours
         case OpenThermMessageID::DHWBurnerOperationHours:
-            this->publish_to_sensor(OpenthermSensorType::dhw_burner_operation_hours, ot->getUInt(response));
+            OPENTHERM_PUBLISH_SENSOR(dhw_burner_operation_hours, ot->getUInt(response))
             break;
+        #endif
         case OpenThermMessageID::TdhwSetUBTdhwSetLB:
-            this->publish_to_sensor(OpenthermSensorType::t_dhw_set_ub, get_high_s8(response));
-            this->publish_to_sensor(OpenthermSensorType::t_dhw_set_lb, get_low_s8(response));
+            #ifdef OPENTHERM_HAS_SENSOR_t_dhw_set_ub
+            OPENTHERM_PUBLISH_SENSOR(t_dhw_set_ub, get_high_s8(response))
+            #endif
+            #ifdef OPENTHERM_HAS_SENSOR_t_dhw_set_lb
+            OPENTHERM_PUBLISH_SENSOR(t_dhw_set_lb, get_low_s8(response))
+            #endif
             break;
         case OpenThermMessageID::MaxTSetUBMaxTSetLB:
-            this->publish_to_sensor(OpenthermSensorType::max_t_set_ub, get_high_s8(response));
-            this->publish_to_sensor(OpenthermSensorType::max_t_set_lb, get_low_s8(response));
+            #ifdef OPENTHERM_HAS_SENSOR_max_t_set_ub
+            OPENTHERM_PUBLISH_SENSOR(max_t_set_ub, get_high_s8(response))
+            #endif
+            #ifdef OPENTHERM_HAS_SENSOR_max_t_set_lb
+            OPENTHERM_PUBLISH_SENSOR(max_t_set_lb, get_low_s8(response))
+            #endif
             break;
+        #ifdef OPENTHERM_HAS_SENSOR_t_dhw_set
         case OpenThermMessageID::TdhwSet:
-            this->publish_to_sensor(OpenthermSensorType::t_dhw_set, ot->getFloat(response));
+            OPENTHERM_PUBLISH_SENSOR(t_dhw_set, ot->getFloat(response))
             break;
+        #endif
         case OpenThermMessageID::MaxTSet:
-            this->publish_to_sensor(OpenthermSensorType::max_t_set, ot->getFloat(response));
-            // if (this->request_max_t_set) {
-            //     this->max_t_set = optional(ot->getFloat(response));
-            // }
+            #ifdef OPENTHERM_HAS_SENSOR_max_t_set
+            OPENTHERM_PUBLISH_SENSOR(max_t_set, ot->getFloat(response))
+            #endif
+            this->set_output_max_setpoint(ot->getFloat(response));
             break;
         case OpenThermMessageID::SConfigSMemberIDcode:
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::dhw_present, response & 0x1);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::control_type_on_off, response & 0x2);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::cooling_supported, response & 0x4);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::dhw_storage_tank, response & 0x8);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::master_pump_control_allowed, response & 0x10);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::ch2_present, response & 0x20);
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_present
+            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_present, response & 0x1)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_control_type_on_off
+            OPENTHERM_PUBLISH_BINARY_SENSOR(control_type_on_off, response & 0x2)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_cooling_supported
+            OPENTHERM_PUBLISH_BINARY_SENSOR(cooling_supported, response & 0x4)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_storage_tank
+            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_storage_tank, response & 0x8)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_master_pump_control_allowed
+            OPENTHERM_PUBLISH_BINARY_SENSOR(master_pump_control_allowed, response & 0x10)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_ch2_present
+            OPENTHERM_PUBLISH_BINARY_SENSOR(ch2_present, response & 0x20)
+            #endif
             break;
         case OpenThermMessageID::RBPflags:
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::dhw_setpoint_transfer_enabled, response & 0x1);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::max_ch_setpoint_transfer_enabled, response & 0x2);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::dhw_setpoint_rw, (response >> 8) & 0x1);
-            this->publish_to_binary_sensor(OpenthermBinarySensorType::max_ch_setpoint_rw, (response >> 8) & 0x2);
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_setpoint_transfer_enabled
+            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_setpoint_transfer_enabled, response & 0x1)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_max_ch_setpoint_transfer_enabled
+            OPENTHERM_PUBLISH_BINARY_SENSOR(max_ch_setpoint_transfer_enabled, response & 0x2)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_setpoint_rw
+            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_setpoint_rw, (response >> 8) & 0x1)
+            #endif
+            #ifdef OPENTHERM_HAS_BINARY_SENSOR_max_ch_setpoint_rw
+            OPENTHERM_PUBLISH_BINARY_SENSOR(max_ch_setpoint_rw, (response >> 8) & 0x2)
+            #endif
             break;
         default:
             ESP_LOGW(TAG, "This response was not expected.");
@@ -228,10 +303,9 @@ void OpenthermHub::setup() {
     this->ot->begin(this->handle_interrupt_callback, this->process_response_callback);
 
     // Ensure that there is at least one request, as we are required to
-    // communicate at least once every second
-    if (this->repeating_requests.begin() == this->repeating_requests.end()) {
-        this->add_repeating_request(OpenThermMessageID::Status);
-    }
+    // communicate at least once every second. Sending the status request is
+    // good practice anyway.
+    this->add_repeating_request(OpenThermMessageID::Status);
 
     this->current_request_iterator = this->initial_requests.begin();
 }

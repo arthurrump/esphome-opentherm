@@ -64,3 +64,9 @@ binary_sensor:
       name: "Boiler Central Heating active"
     dhw_active:
       name: "Boiler Domestic Hot Water active"
+
+switch:
+  - platform: opentherm
+    ch_enable:
+      name: "Boiler Central Heating enable"
+      mode: restore_default_on
