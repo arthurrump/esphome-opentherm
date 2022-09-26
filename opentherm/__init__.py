@@ -22,9 +22,6 @@ CONFIG_SCHEMA = cv.All(
         cv.Optional("cooling_enable", False): cv.boolean,
         cv.Optional("otc_active", False): cv.boolean,
         cv.Optional("ch2_active", False): cv.boolean,
-        cv.Optional("min_t_set", 0): cv.float_range(0, 100),
-        cv.Optional("max_t_set", 100): cv.float_range(0, 100),
-        cv.Optional("request_max_t_set", False): cv.boolean,
     }).extend(cv.COMPONENT_SCHEMA),
     cv.only_with_arduino,
 )
@@ -48,5 +45,9 @@ async def to_code(config):
     cg.add_global(cpp.RawStatement("void IRAM_ATTR " + id + "_handle_interrupt() { " + id + "->handle_interrupt(); }"))
     cg.add_global(cpp.RawStatement("void " + id + "_process_response(unsigned long response, OpenThermResponseStatus status) { " + id + "->process_response(response, status); }"))
     await cg.register_component(var, config)
+
+    for key, value in config.items():
+        if key != CONF_ID:
+            cg.add(getattr(var, f"set_{key}")(value))
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.3")

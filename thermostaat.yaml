@@ -48,6 +48,7 @@ status_led:
 
 opentherm:
   id: othub
+  dhw_enable: false
 
 sensor:
   - platform: opentherm
