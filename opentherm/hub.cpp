@@ -43,13 +43,13 @@ void OpenthermHub::publish_to_binary_sensor(OpenthermBinarySensorType type, bool
     }
 }
 
-void OpenthermHub::register_sensor(OpenthermSensor* sensor) {
-    if (this->sensors[sensor->type] == nullptr) {
-        ESP_LOGW(TAG, "A sensor for type %s has already been registerd. Only the last registration will be used.", sensor->type);
+void OpenthermHub::register_sensor(OpenthermSensorType type, sensor::Sensor* sensor) {
+    if (this->sensors[type] == nullptr) {
+        ESP_LOGW(TAG, "A sensor for type %s has already been registerd. Only the last registration will be used.", type);
     }
 
-    this->sensors[sensor->type] = sensor;
-    switch (sensor->type) {
+    this->sensors[type] = sensor;
+    switch (type) {
         case OpenthermSensorType::rel_mod_level:
             this->add_repeating_request(OpenThermMessageID::RelModLevel);
             break;
@@ -127,13 +127,13 @@ void OpenthermHub::register_sensor(OpenthermSensor* sensor) {
     }
 }
 
-void OpenthermHub::register_binary_sensor(OpenthermBinarySensor* sensor) {
-    if (this->binary_sensors[sensor->type] == nullptr) {
-        ESP_LOGW(TAG, "A sensor for type %s has already been registerd. Only the last registration will be used.", sensor->type);
+void OpenthermHub::register_binary_sensor(OpenthermBinarySensorType type, binary_sensor::BinarySensor* sensor) {
+    if (this->binary_sensors[type] == nullptr) {
+        ESP_LOGW(TAG, "A sensor for type %s has already been registerd. Only the last registration will be used.", type);
     }
 
-    this->binary_sensors[sensor->type] = sensor;
-    switch (sensor->type) {
+    this->binary_sensors[type] = sensor;
+    switch (type) {
         case OpenthermBinarySensorType::fault_indication:
         case OpenthermBinarySensorType::ch_active:
         case OpenthermBinarySensorType::dhw_active:

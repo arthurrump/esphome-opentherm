@@ -1,8 +1,5 @@
 #pragma once
 
-#include "esphome/core/component.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
-
 namespace esphome {
 namespace opentherm {
 
@@ -32,14 +29,6 @@ enum class OpenthermBinarySensorType {
     max_ch_setpoint_transfer_enabled,
     dhw_setpoint_rw,
     max_ch_setpoint_rw,
-};
-
-class OpenthermBinarySensor : public binary_sensor::BinarySensor, public Component {
-public:
-    OpenthermBinarySensorType type;
-    OpenthermBinarySensor(OpenthermBinarySensorType type) : type(type) {}
-
-    std::string device_class() override;
 };
 
 } // namespace opentherm

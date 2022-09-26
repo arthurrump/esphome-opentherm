@@ -1,8 +1,5 @@
 esphome:
   name: thermostaat
-  platformio_options: 
-    lib_deps:
-    - ihormelnyk/OpenTherm Library @ 1.1.3
 
 external_components:
   source: 
@@ -51,3 +48,19 @@ status_led:
 
 opentherm:
   id: othub
+
+sensor:
+  - platform: opentherm
+    t_boiler:
+      name: "Boiler Flow temperature"
+    t_ret:
+      name: "Boiler Return flow temperature"
+
+binary_sensor:
+  - platform: opentherm
+    flame_on:
+      name: "Boiler Flame on"
+    ch_active:
+      name: "Boiler Central Heating active"
+    dhw_active:
+      name: "Boiler Domestic Hot Water active"

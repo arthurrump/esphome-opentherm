@@ -1,8 +1,8 @@
 #pragma once
 
 #include "esphome/core/component.h"
-#include "esphome/components/output/float_output.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/number/number.h"
 
 #include "OpenTherm.h"
@@ -10,29 +10,13 @@
 #include "sensor.h"
 #include "binary_sensor.h"
 #include "switch.h"
+#include "output.h"
 
 #include <unordered_map>
 #include <unordered_set>
 
 namespace esphome {
 namespace opentherm {
-
-// Output component for the relative setpoint
-class RelativeSetpoint : public output::FloatOutput, public Component {
-protected:
-    bool has_state_ = false;
-
-public:
-    float state;
-
-    void write_state(float state) override { 
-        this->state = state;
-        this->has_state_ = true;
-    };
-
-    bool has_state() { return this->has_state_; };
-    float get_state() { return this->state; };
-};
 
 // OpenTherm component for ESPHome
 class OpenthermHub : public Component {
@@ -43,8 +27,8 @@ protected:
     OpenTherm* ot;
 
     // List of sensors and binary sensors that have been added to the hub
-    std::unordered_map<OpenthermSensorType, OpenthermSensor*> sensors;
-    std::unordered_map<OpenthermBinarySensorType, OpenthermBinarySensor*> binary_sensors;
+    std::unordered_map<OpenthermSensorType, sensor::Sensor*> sensors;
+    std::unordered_map<OpenthermBinarySensorType, binary_sensor::BinarySensor*> binary_sensors;
 
     // The set of initial requests to make on starting communication with the boiler
     std::unordered_set<byte> initial_requests;
@@ -107,8 +91,8 @@ public:
     void set_out_pin(int out_pin) { this->out_pin = out_pin; }
 
     // Methods to register sensors and binary sensors
-    void register_sensor(OpenthermSensor* sensor);
-    void register_binary_sensor(OpenthermBinarySensor* binary_sensor);
+    void register_sensor(OpenthermSensorType type, sensor::Sensor* sensor);
+    void register_binary_sensor(OpenthermBinarySensorType type, binary_sensor::BinarySensor* binary_sensor);
 
     // Add a request to the set of initial requests
     void add_initial_request(byte request) { this->initial_requests.insert(request); }

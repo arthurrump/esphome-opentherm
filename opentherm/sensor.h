@@ -1,8 +1,5 @@
 #pragma once
 
-#include "esphome/core/component.h"
-#include "esphome/components/sensor/sensor.h"
-
 namespace esphome {
 namespace opentherm {
 
@@ -60,17 +57,6 @@ enum class OpenthermSensorType {
     t_dhw_set,
     // Message 57 (MaxTSet) maximum allowable CH water setpoint (°C)
     max_t_set,
-};
-
-class OpenthermSensor : public sensor::Sensor, public Component {
-public:
-    OpenthermSensorType type;
-    OpenthermSensor(OpenthermSensorType type) : type(type) {};
-
-    std::string unit_of_measurement() override;
-    int8_t accuracy_decimals() override;
-    std::string device_class() override;
-    sensor::StateClass state_class() override;
 };
 
 } // namespace opentherm
