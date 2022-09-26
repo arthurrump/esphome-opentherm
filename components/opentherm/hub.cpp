@@ -30,18 +30,22 @@ unsigned int OpenthermHub::build_request(byte request_id) {
         case OpenThermMessageID::Status:
             ESP_LOGD(TAG, "Building Status request");
             return ot->buildSetBoilerStatusRequest(this->ch_enable, this->dhw_enable, this->cooling_enable, this->otc_active, this->ch2_active);
+        #ifdef OPENTHERM_READ_INPUT_t_set
         case OpenThermMessageID::TSet: {
             float target_temp = OPENTHERM_READ_INPUT_t_set;
             ESP_LOGD(TAG, "Building request to set target temperature at %.1f", target_temp);
             unsigned int data = ot->temperatureToData(target_temp);
             return ot->buildRequest(OpenThermMessageType::WRITE_DATA, (OpenThermMessageID)request_id, data);
         }
+        #endif
+        #ifdef OPENTHERM_READ_INPUT_t_set_ch2
         case OpenThermMessageID::TsetCH2: {
             float target_temp = OPENTHERM_READ_INPUT_t_set_ch2;
             ESP_LOGD(TAG, "Building request to set target temperature at %.1f", target_temp);
             unsigned int data = ot->temperatureToData(target_temp);
             return ot->buildRequest(OpenThermMessageType::WRITE_DATA, (OpenThermMessageID)request_id, data);
         }
+        #endif
         case OpenThermMessageID::RelModLevel:
         case OpenThermMessageID::CHPressure:
         case OpenThermMessageID::DHWFlowRate:
