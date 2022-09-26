@@ -49,10 +49,27 @@ status_led:
 opentherm:
   id: othub
   dhw_enable: false
+  t_set: t_boiler
+  t_set_ch2: t_boiler
+
+output:
+  - platform: opentherm
+    t_set:
+      id: t_set
+    t_set_ch2:
+      id: t_set_ch2
+
+number:
+  - platform: opentherm
+    t_set:
+      name: "Boiler CH Temperature setpoint"
+    t_set_ch2:
+      name: "Boiler CH2 Temperature setpoint"
 
 sensor:
   - platform: opentherm
     t_boiler:
+      id: t_boiler
       name: "Boiler Flow temperature"
     t_ret:
       name: "Boiler Return flow temperature"
