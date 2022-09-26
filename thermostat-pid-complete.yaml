@@ -4,7 +4,7 @@ esphome:
 external_components:
   source: 
     type: local
-    path: .
+    path: components
   components: [ opentherm ]
 
 esp8266:
