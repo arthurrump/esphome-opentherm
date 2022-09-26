@@ -13,14 +13,18 @@ namespace opentherm {
 class SetpointOutput : public output::FloatOutput, public Component {
 protected:
     bool has_state_ = false;
+    const char* id = nullptr;
 
 public:
     float state;
     bool auto_max_power = false;
 
+    void set_id(const char* id) { this->id = id; }
+
     void write_state(float state) override { 
         this->state = state * 100;
         this->has_state_ = true;
+        ESP_LOGD("opentherm.output", "Output %s set to %.2f", this->id, this->state);
     };
 
     bool has_state() { return this->has_state_; };

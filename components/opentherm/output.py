@@ -38,6 +38,7 @@ async def to_code(config):
         id = conf[CONF_ID]
         if id and id.type == SetpointOutput:
             so = await new_setpointoutput(conf)
+            cg.add(getattr(so, "set_id")(cg.RawExpression(f'"{id}"')))
             if CONF_auto_max_power in conf:
                 cg.add(getattr(so, "set_auto_max_power")(conf[CONF_auto_max_power]))
             cg.add(getattr(hub, f"set_{key}_output")(so))
