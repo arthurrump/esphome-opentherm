@@ -22,6 +22,11 @@ float OpenthermHub::get_t_set_input(byte request_id) {
 }
 
 void OpenthermHub::set_output_max_setpoint(float max_setpoint) {
+#define OPENTHERM_SET_OUTPUT_MAX_SETPOINT(output) \
+    if (this->output ## _output != nullptr && this->output ## _output->auto_max_power) { \
+        output ## _output->set_max_power(max_setpoint / 100.); \
+    }
+    OPENTHERM_OUTPUT_LIST(OPENTHERM_SET_OUTPUT_MAX_SETPOINT, )
 }
 
 unsigned int OpenthermHub::build_request(byte request_id) {

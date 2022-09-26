@@ -13,10 +13,10 @@ namespace opentherm {
 class SetpointOutput : public output::FloatOutput, public Component {
 protected:
     bool has_state_ = false;
-    bool auto_max_power = false;
 
 public:
     float state;
+    bool auto_max_power = false;
 
     void write_state(float state) override { 
         this->state = state * 100;
