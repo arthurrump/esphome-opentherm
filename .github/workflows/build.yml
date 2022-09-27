@@ -8,5 +8,4 @@ jobs:
     container: esphome/esphome:latest
     steps:
       - uses: actions/checkout@v3
-      - run: compile_all.py
-        shell: python
+      - run: python3 compile_all.py
