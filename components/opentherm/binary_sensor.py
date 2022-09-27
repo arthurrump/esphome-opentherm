@@ -1,53 +1,24 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor
-from esphome.const import (
-    CONF_ID,
-    DEVICE_CLASS_COLD,
-    DEVICE_CLASS_HEAT,
-    DEVICE_CLASS_PROBLEM
-)
+from esphome.const import CONF_ID
+
+from components.opentherm.schema import OPENTHERM_BINARY_SENSORS, BinarySensorSchema
+from components.opentherm.validate import create_validation_schema
 from . import CONF_OPENTHERM_ID, OpenthermHub, cg_write_component_defines, cg_write_required_messages
 
 DEPENDENCIES = [ 'opentherm' ]
 
-CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub),
-    cv.Optional("fault_indication"): binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_PROBLEM
-    ),
-    cv.Optional("ch_active"): binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_HEAT,
-        icon="mdi:radiator"
-    ),
-    cv.Optional("dhw_active"): binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_HEAT,
-        icon="mdi:faucet"
-    ),
-    cv.Optional("flame_on"): binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_HEAT
-    ),
-    cv.Optional("cooling_active"): binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_COLD
-    ),
-    cv.Optional("ch2_active"): binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_HEAT,
-        icon="mdi:radiator"
-    ),
-    cv.Optional("diagnostic_indication"): binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_PROBLEM
-    ),
-    cv.Optional("dhw_present"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("control_type_on_off"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("cooling_supported"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("dhw_storage_tank"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("master_pump_control_allowed"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("ch2_present"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("dhw_setpoint_transfer_enabled"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("max_ch_setpoint_transfer_enabled"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("dhw_setpoint_rw"): binary_sensor.binary_sensor_schema(),
-    cv.Optional("max_ch_setpoint_rw"): binary_sensor.binary_sensor_schema(),
-}).extend(cv.COMPONENT_SCHEMA)
+def get_entity_validation_schema(entity: BinarySensorSchema) -> cv.Schema:
+    return binary_sensor.binary_sensor_schema(
+        device_class = entity["device_class"] if "device_class" in entity else cv._UNDEF,
+        icon = entity["icon"] if "icon" in entity else cv._UNDEF
+    )
+
+CONFIG_SCHEMA = \
+    cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
+        .extend(create_validation_schema(OPENTHERM_BINARY_SENSORS, get_entity_validation_schema)) \
+        .extend(cv.COMPONENT_SCHEMA)
 
 def required_messages(sensor_keys):
     messages = set()

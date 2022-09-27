@@ -50,7 +50,7 @@ protected:
     #endif
     OPENTHERM_INPUT_SENSOR_LIST(OPENTHERM_DECLARE_INPUT_SENSOR, )
 
-    #define OPENTHERM_DECLARE_OUTPUT(s) SetpointOutput* s ## _output;
+    #define OPENTHERM_DECLARE_OUTPUT(s) OpenthermOutput* s ## _output;
     #ifndef OPENTHERM_OUTPUT_LIST
     #define OPENTHERM_OUTPUT_LIST(F, sep)
     #endif
@@ -110,7 +110,7 @@ public:
     #define OPENTHERM_SET_INPUT_SENSOR(s) void set_ ## s ## _input_sensor(sensor::Sensor* sensor) { this->s ## _input_sensor = sensor; }
     OPENTHERM_INPUT_SENSOR_LIST(OPENTHERM_SET_INPUT_SENSOR, )
 
-    #define OPENTHERM_SET_OUTPUT(s) void set_ ## s ## _output(SetpointOutput* output) { this->s ## _output = output; }
+    #define OPENTHERM_SET_OUTPUT(s) void set_ ## s ## _output(OpenthermOutput* output) { this->s ## _output = output; }
     OPENTHERM_OUTPUT_LIST(OPENTHERM_SET_OUTPUT, )
 
     #define OPENTHERM_SET_NUMBER(s) void set_ ## s ## _number(number::Number* number) { this->s ## _number = number; }

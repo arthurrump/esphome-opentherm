@@ -2,6 +2,9 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import switch
 from esphome.const import CONF_ID
+
+from components.opentherm.schema import OPENTHERM_SWITCHES, SwitchSchema
+from components.opentherm.validate import create_validation_schema
 from . import CONF_OPENTHERM_ID, OpenthermHub, opentherm_ns, cg_write_component_defines, cg_write_required_messages
 
 DEPENDENCIES = [ "opentherm" ]
@@ -16,10 +19,10 @@ async def new_ot_switch(config, *args):
 
 CONF_MODE = "mode"
 
-def ot_switch_schema(default_mode):
+def get_entity_validation_schema(entity: SwitchSchema) -> cv.Schema:
     return switch.SWITCH_SCHEMA.extend({
         cv.GenerateID(): cv.declare_id(OpenthermSwitch),
-        cv.Optional(CONF_MODE, default_mode): 
+        cv.Optional(CONF_MODE, entity["default_mode"]): 
             cv.enum({
                 "restore_default_on": cg.RawExpression("opentherm::OpenthermSwitchMode::OPENTHERM_SWITCH_RESTORE_DEFAULT_ON"), 
                 "restore_default_off": cg.RawExpression("opentherm::OpenthermSwitchMode::OPENTHERM_SWITCH_RESTORE_DEFAULT_OFF"),
@@ -28,14 +31,10 @@ def ot_switch_schema(default_mode):
             })
     }).extend(cv.COMPONENT_SCHEMA)
 
-CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub),
-    cv.Optional("ch_enable"): ot_switch_schema("restore_default_on"),
-    cv.Optional("dhw_enable"): ot_switch_schema("restore_default_on"),
-    cv.Optional("cooling_enable"): ot_switch_schema("restore_default_off"),
-    cv.Optional("otc_active"): ot_switch_schema("restore_default_off"),
-    cv.Optional("ch2_active"): ot_switch_schema("restore_default_off"),
-}).extend(cv.COMPONENT_SCHEMA)
+CONFIG_SCHEMA = \
+    cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
+        .extend(create_validation_schema(OPENTHERM_SWITCHES, get_entity_validation_schema)) \
+        .extend(cv.COMPONENT_SCHEMA)
 
 def required_messages(keys):
     messages = set()

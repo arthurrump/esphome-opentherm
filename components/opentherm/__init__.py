@@ -7,25 +7,6 @@ from esphome.const import CONF_ID
 AUTO_LOAD = [ 'binary_sensor', 'sensor', 'switch', 'number', 'output' ]
 MULTI_CONF = True
 
-CONF_INPUT_t_set = "t_set"
-CONF_INPUT_t_set_ch2 = "t_set_ch2"
-
-input_keys = [
-    CONF_INPUT_t_set,
-    CONF_INPUT_t_set_ch2,
-]
-
-def is_input_key(key):
-    return key in input_keys
-
-def input_required_messages(input_keys):
-    messages = set()
-    if CONF_INPUT_t_set in input_keys:
-        messages.add((True, "TSet"))
-    if CONF_INPUT_t_set_ch2 in input_keys:
-        messages.add((True, "TsetCH2"))
-    return messages
-
 def cv_inputs_schema(get_validator):
     schema = {}
     for key in input_keys:

@@ -1,38 +1,33 @@
 #pragma once
 
 #include "esphome/components/output/float_output.h"
+#include "input.h"
 
 namespace esphome {
 namespace opentherm {
 
-// FloatOutput component for TSet and TSetCH2 setpoint temperatures. By default
-// this ranges from temperature 0-100 degrees Celsius (the control setpoint
-// range supported in the OpenTherm protocol) for inputs 0.0-1.0, but this can
-// be changed by setting min_power and max_power to the desired minimum and
-// maximum temperatures.
-class SetpointOutput : public output::FloatOutput, public Component {
+class OpenthermOutput : public output::FloatOutput, public Component, public OpenthermInput {
 protected:
     bool has_state_ = false;
     const char* id = nullptr;
 
+    float min_value, max_value;
+
 public:
     float state;
-    bool auto_max_power = false;
 
     void set_id(const char* id) { this->id = id; }
 
     void write_state(float state) override { 
-        this->state = state * 100;
+        this->state = min_value + state * (max_value - min_value);
         this->has_state_ = true;
         ESP_LOGD("opentherm.output", "Output %s set to %.2f", this->id, this->state);
     };
 
     bool has_state() { return this->has_state_; };
 
-    // Use auto_max_power to automatically set the maximum power for this
-    // component to the maximum allowable setpoint temperature reported by the
-    // boiler.
-    void set_auto_max_power(bool auto_max_power) { this->auto_max_power = auto_max_power; };
+    void set_min_value(float min_value) override { this->min_value = min_value; }
+    void set_max_value(float max_value) override { this->max_value = max_value; }
 };
 
 } // namespace opentherm
