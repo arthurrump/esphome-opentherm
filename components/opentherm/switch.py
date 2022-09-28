@@ -32,7 +32,7 @@ def get_entity_validation_schema(entity: schema.SwitchSchema) -> cv.Schema:
 
 CONFIG_SCHEMA = \
     cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
-        .extend(validate.create_validation_schema(schema.OPENTHERM_SWITCHES, get_entity_validation_schema)) \
+        .extend(validate.create_validation_schema(schema.SWITCHES, get_entity_validation_schema)) \
         .extend(cv.COMPONENT_SCHEMA)
 
 def required_messages(keys):

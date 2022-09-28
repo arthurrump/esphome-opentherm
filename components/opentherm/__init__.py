@@ -27,7 +27,7 @@ CONFIG_SCHEMA = cv.All(
         cv.Optional("cooling_enable", False): cv.boolean,
         cv.Optional("otc_active", False): cv.boolean,
         cv.Optional("ch2_active", False): cv.boolean,
-    }).extend(validate.create_validation_schema(schema.OPENTHERM_INPUTS, (lambda _: cv.use_id(sensor.Sensor))))
+    }).extend(validate.create_validation_schema(schema.INPUTS, (lambda _: cv.use_id(sensor.Sensor))))
       .extend(cv.COMPONENT_SCHEMA),
     cv.only_with_arduino,
 )
@@ -55,7 +55,7 @@ async def to_code(config):
     input_sensors = []
     for key, value in config.items():
         if key != CONF_ID:
-            if key in schema.OPENTHERM_INPUTS:
+            if key in schema.INPUTS:
                 sensor = await cg.get_variable(value)
                 cg.add(getattr(var, f"set_{key}_input_sensor")(sensor))
                 input_sensors.append(key)

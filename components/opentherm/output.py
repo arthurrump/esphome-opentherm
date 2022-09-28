@@ -25,7 +25,7 @@ def get_entity_validation_schema(entity: schema.InputSchema) -> cv.Schema:
 
 CONFIG_SCHEMA = \
     cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
-        .extend(validate.create_validation_schema(schema.OPENTHERM_INPUTS, get_entity_validation_schema)) \
+        .extend(validate.create_validation_schema(schema.INPUTS, get_entity_validation_schema)) \
         .extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):

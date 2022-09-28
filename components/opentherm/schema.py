@@ -43,11 +43,12 @@ class EntitySchema(TypedDict):
 class SensorSchema(EntitySchema):
     unit_of_measurement: NotRequired[str]
     accuracy_decimals: int
+    device_class: NotRequired[str]
     icon: NotRequired[str]
     state_class: str
 
-OPENTHERM_SENSORS: Schema[SensorSchema] = {
-    "rel_mod_level": {
+SENSORS: Schema[SensorSchema] = Schema({
+    "rel_mod_level": SensorSchema({
         "description": "Relative modulation level",
         "unit_of_measurement": UNIT_PERCENT,
         "accuracy_decimals": 2,
@@ -56,8 +57,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "RelModLevel",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "ch_pressure": {
+    }),
+    "ch_pressure": SensorSchema({
         "description": "Water pressure in CH circuit",
         "unit_of_measurement": "bar",
         "accuracy_decimals": 2,
@@ -66,8 +67,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "CHPressure",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "dhw_flow_rate": {
+    }),
+    "dhw_flow_rate": SensorSchema({
         "description": "Water flow rate in DHW circuit",
         "unit_of_measurement": "l/min",
         "accuracy_decimals": 2,
@@ -76,8 +77,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "DHWFlowRate",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_boiler": {
+    }),
+    "t_boiler": SensorSchema({
         "description": "Boiler water temperature",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -86,8 +87,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Tboiler",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_dhw": {
+    }),
+    "t_dhw": SensorSchema({
         "description": "DHW temperature",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -96,8 +97,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Tdhw",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_outside": {
+    }),
+    "t_outside": SensorSchema({
         "description": "Outside temperature",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -106,8 +107,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Toutside",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_ret": {
+    }),
+    "t_ret": SensorSchema({
         "description": "Return water temperature",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -116,8 +117,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Tret",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_storage": {
+    }),
+    "t_storage": SensorSchema({
         "description": "Solar storage temperature",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -126,8 +127,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Tstorage",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_collector": {
+    }),
+    "t_collector": SensorSchema({
         "description": "Solar collector temperature",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
@@ -136,8 +137,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Tcollector",
         "keep_updated": True,
         "message_data": "s16",
-    },
-    "t_flow_ch2": {
+    }),
+    "t_flow_ch2": SensorSchema({
         "description": "Flow water temperature CH2 circuit",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -146,8 +147,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "TflowCH2",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_dhw2": {
+    }),
+    "t_dhw2": SensorSchema({
         "description": "Domestic hot water temperature 2",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -156,8 +157,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Tdhw2",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "t_exhaust": {
+    }),
+    "t_exhaust": SensorSchema({
         "description": "Boiler exhaust temperature",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
@@ -166,8 +167,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "Texhaust",
         "keep_updated": True,
         "message_data": "s16",
-    },
-    "burner_starts": {
+    }),
+    "burner_starts": SensorSchema({
         "description": "Number of starts burner",
         "accuracy_decimals": 0,
         "icon": "mdi:gas-burner",
@@ -175,8 +176,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "BurnerStarts",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "ch_pump_starts": {
+    }),
+    "ch_pump_starts": SensorSchema({
         "description": "Number of starts CH pump",
         "accuracy_decimals": 0,
         "icon": "mdi:pump",
@@ -184,8 +185,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "CHPumpStarts",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "dhw_pump_valve_starts": {
+    }),
+    "dhw_pump_valve_starts": SensorSchema({
         "description": "Number of starts DHW pump/valve",
         "accuracy_decimals": 0,
         "icon": "mdi:water-pump",
@@ -193,8 +194,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "DHWPumpValveStarts",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "dhw_burner_starts": {
+    }),
+    "dhw_burner_starts": SensorSchema({
         "description": "Number of starts burner during DHW mode",
         "accuracy_decimals": 0,
         "icon": "mdi:gas-burner",
@@ -202,8 +203,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "DHWBurnerStarts",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "burner_operation_hours": {
+    }),
+    "burner_operation_hours": SensorSchema({
         "description": "Number of hours that burner is in operation",
         "accuracy_decimals": 0,
         "icon": "mdi:clock-outline",
@@ -211,8 +212,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "BurnerOperationHours",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "ch_pump_operation_hours": {
+    }),
+    "ch_pump_operation_hours": SensorSchema({
         "description": "Number of hours that CH pump has been running",
         "accuracy_decimals": 0,
         "icon": "mdi:clock-outline",
@@ -220,8 +221,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "CHPumpOperationHours",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "dhw_pump_valve_operation_hours": {
+    }),
+    "dhw_pump_valve_operation_hours": SensorSchema({
         "description": "Number of hours that DHW pump has been running or DHW valve has been opened",
         "accuracy_decimals": 0,
         "icon": "mdi:clock-outline",
@@ -229,8 +230,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "DHWPumpValveOperationHours",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "dhw_burner_operation_hours": {
+    }),
+    "dhw_burner_operation_hours": SensorSchema({
         "description": "Number of hours that burner is in operation during DHW mode",
         "accuracy_decimals": 0,
         "icon": "mdi:clock-outline",
@@ -238,8 +239,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "DHWBurnerOperationHours",
         "keep_updated": True,
         "message_data": "u16",
-    },
-    "t_dhw_set_ub": {
+    }),
+    "t_dhw_set_ub": SensorSchema({
         "description": "Upper bound for adjustement of DHW setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
@@ -248,8 +249,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "TdhwSetUBTdhwSetLB",
         "keep_updated": False,
         "message_data": "s8_hb",
-    },
-    "t_dhw_set_lb": {
+    }),
+    "t_dhw_set_lb": SensorSchema({
         "description": "Lower bound for adjustement of DHW setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
@@ -258,8 +259,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "TdhwSetUBTdhwSetLB",
         "keep_updated": False,
         "message_data": "s8_lb",
-    },
-    "max_t_set_ub": {
+    }),
+    "max_t_set_ub": SensorSchema({
         "description": "Upper bound for adjustement of max CH setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
@@ -268,8 +269,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "MaxTSetUBMaxTSetLB",
         "keep_updated": False,
         "message_data": "s8_hb",
-    },
-    "max_t_set_lb": {
+    }),
+    "max_t_set_lb": SensorSchema({
         "description": "Lower bound for adjustement of max CH setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
@@ -278,8 +279,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "MaxTSetUBMaxTSetLB",
         "keep_updated": False,
         "message_data": "s8_lb",
-    },
-    "t_dhw_set": {
+    }),
+    "t_dhw_set": SensorSchema({
         "description": "Domestic hot water temperature setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -288,8 +289,8 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "TdhwSet",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-    "max_t_set": {
+    }),
+    "max_t_set": SensorSchema({
         "description": "Maximum allowable CH water setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 2,
@@ -298,167 +299,168 @@ OPENTHERM_SENSORS: Schema[SensorSchema] = {
         "message": "MaxTSet",
         "keep_updated": True,
         "message_data": "f8.8",
-    },
-}
+    }),
+})
 
 class BinarySensorSchema(EntitySchema):
     device_class: NotRequired[str]
+    icon: NotRequired[str]
 
-OPENTHERM_BINARY_SENSORS: Schema = {
-    "fault_indication": {
+BINARY_SENSORS: Schema = Schema({
+    "fault_indication": BinarySensorSchema({
         "description": "Status: Fault indication",
         "device_class": DEVICE_CLASS_PROBLEM,
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_0",
-    },
-    "ch_active": {
+    }),
+    "ch_active": BinarySensorSchema({
         "description": "Status: Central Heating active",
         "device_class": DEVICE_CLASS_HEAT,
         "icon": "mdi:radiator",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_1",
-    },
-    "dhw_active": {
+    }),
+    "dhw_active": BinarySensorSchema({
         "description": "Status: Domestic Hot Water active",
         "device_class": DEVICE_CLASS_HEAT,
         "icon": "mdi:faucet",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_2",
-    },
-    "flame_on": {
+    }),
+    "flame_on": BinarySensorSchema({
         "description": "Status: Flame on",
         "device_class": DEVICE_CLASS_HEAT,
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_3",
-    },
-    "cooling_active": {
+    }),
+    "cooling_active": BinarySensorSchema({
         "description": "Status: Cooling active",
         "device_class": DEVICE_CLASS_COLD,
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_4",
-    },
-    "ch2_active": {
+    }),
+    "ch2_active": BinarySensorSchema({
         "description": "Status: Central Heating 2 active",
         "device_class": DEVICE_CLASS_HEAT,
         "icon": "mdi:radiator",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_5",
-    },
-    "diagnostic_indication": {
+    }),
+    "diagnostic_indication": BinarySensorSchema({
         "description": "Status: Diagnostic event",
         "device_class": DEVICE_CLASS_PROBLEM,
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_6",
-    },
-    "dhw_present": {
+    }),
+    "dhw_present": BinarySensorSchema({
         "description": "Configuration: DHW present",
         "message": "SConfigSMemberIDcode",
         "keep_updated": False,
         "message_data": "flag8_hb_0",
-    },
-    "control_type_on_off": {
+    }),
+    "control_type_on_off": BinarySensorSchema({
         "description": "Configuration: Control type is on/off",
         "message": "SConfigSMemberIDcode",
         "keep_updated": False,
         "message_data": "flag8_hb_1",
-    },
-    "cooling_supported": {
+    }),
+    "cooling_supported": BinarySensorSchema({
         "description": "Configuration: Cooling supported",
         "message": "SConfigSMemberIDcode",
         "keep_updated": False,
         "message_data": "flag8_hb_2",
-    },
-    "dhw_storage_tank": {
+    }),
+    "dhw_storage_tank": BinarySensorSchema({
         "description": "Configuration: DHW storage tank",
         "message": "SConfigSMemberIDcode",
         "keep_updated": False,
         "message_data": "flag8_hb_3",
-    },
-    "master_pump_control_allowed": {
+    }),
+    "master_pump_control_allowed": BinarySensorSchema({
         "description": "Configuration: Master pump control allowed",
         "message": "SConfigSMemberIDcode",
         "keep_updated": False,
         "message_data": "flag8_hb_4",
-    },
-    "ch2_present": {
+    }),
+    "ch2_present": BinarySensorSchema({
         "description": "Configuration: CH2 present",
         "message": "SConfigSMemberIDcode",
         "keep_updated": False,
         "message_data": "flag8_hb_5",
-    },
-    "dhw_setpoint_transfer_enabled": {
+    }),
+    "dhw_setpoint_transfer_enabled": BinarySensorSchema({
         "description": "Remote boiler parameters: DHW setpoint transfer enabled",
         "message": "RBPflags",
         "keep_updated": False,
         "message_data": "flag8_hb_0",
-    },
-    "max_ch_setpoint_transfer_enabled": {
+    }),
+    "max_ch_setpoint_transfer_enabled": BinarySensorSchema({
         "description": "Remote boiler parameters: CH maximum setpoint transfer enabled",
         "message": "RBPflags",
         "keep_updated": False,
         "message_data": "flag8_hb_1",
-    },
-    "dhw_setpoint_rw": {
+    }),
+    "dhw_setpoint_rw": BinarySensorSchema({
         "description": "Remote boiler parameters: DHW setpoint read/write",
         "message": "RBPflags",
         "keep_updated": False,
         "message_data": "flag8_lb_0",
-    },
-    "max_ch_setpoint_rw": {
+    }),
+    "max_ch_setpoint_rw": BinarySensorSchema({
         "description": "Remote boiler parameters: CH maximum setpoint read/write",
         "message": "RBPflags",
         "keep_updated": False,
         "message_data": "flag8_lb_1",
-    },
-}
+    }),
+})
 
 class SwitchSchema(EntitySchema):
     default_mode: str
 
-OPENTHERM_SWITCHES: Schema[SwitchSchema] = {
-    "ch_enable": {
+SWITCHES: Schema[SwitchSchema] = Schema({
+    "ch_enable": SwitchSchema({
         "description": "Central Heating enabled",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_hb_0",
         "default_mode": "restore_default_on"
-    },
-    "dhw_enable": {
+    }),
+    "dhw_enable": SwitchSchema({
         "description": "Domestic Hot Water enabled",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_hb_1",
         "default_mode": "restore_default_on"
-    },
-    "cooling_enable": {
+    }),
+    "cooling_enable": SwitchSchema({
         "description": "Cooling enabled",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_hb_2",
         "default_mode": "restore_default_off"
-    },
-    "otc_active": {
+    }),
+    "otc_active": SwitchSchema({
         "description": "Outside temperature compensation active",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_hb_3",
         "default_mode": "restore_default_off"
-    },
-    "ch2_active": {
+    }),
+    "ch2_active": SwitchSchema({
         "description": "Central Heating 2 active",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_hb_4",
         "default_mode": "restore_default_off"
-    },
-}
+    }),
+})
 
 class AutoConfigure(TypedDict):
     message: str
@@ -470,8 +472,8 @@ class InputSchema(EntitySchema):
     auto_max_value: NotRequired[AutoConfigure]
     auto_min_value: NotRequired[AutoConfigure]
 
-OPENTHERM_INPUTS: Schema[InputSchema] = {
-    "t_set": {
+INPUTS: Schema[InputSchema] = Schema({
+    "t_set": InputSchema({
         "description": "Control setpoint: temperature setpoint for the boiler's supply water",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TSet",
@@ -479,8 +481,8 @@ OPENTHERM_INPUTS: Schema[InputSchema] = {
         "message_data": "f8.8",
         "range": (0, 100),
         "auto_max_value": { "message": "MaxTSet", "message_data": "f8.8" },
-    },
-    "t_set_ch2": {
+    }),
+    "t_set_ch2": InputSchema({
         "description": "Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TsetCH2",
@@ -488,16 +490,16 @@ OPENTHERM_INPUTS: Schema[InputSchema] = {
         "message_data": "f8.8",
         "range": (0, 100),
         "auto_max_value": { "message": "MaxTSet", "message_data": "f8.8" },
-    },
-    "cooling_control": {
+    }),
+    "cooling_control": InputSchema({
         "description": "Cooling control signal",
         "unit_of_measurement": UNIT_PERCENT,
         "message": "CoolingControl",
         "keep_updated": True,
         "message_data": "f8.8",
         "range": (0, 100),
-    },
-    "t_dhw_set": {
+    }),
+    "t_dhw_set": InputSchema({
         "description": "Domestic hot water temperature setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TdhwSet",
@@ -506,8 +508,8 @@ OPENTHERM_INPUTS: Schema[InputSchema] = {
         "range": (0, 127),
         "auto_min_value": { "message": "TdhwSetUBTdhwSetLB", "message_data": "s8_lb" },
         "auto_max_value": { "message": "TdhwSetUBTdhwSetLB", "message_data": "s8_hb" },
-    },
-    "max_t_set": {
+    }),
+    "max_t_set": InputSchema({
         "description": "Maximum allowable CH water setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "MaxTSet",
@@ -516,29 +518,29 @@ OPENTHERM_INPUTS: Schema[InputSchema] = {
         "range": (0, 127),
         "auto_min_value": { "message": "MaxTSetUBMaxTSetLB", "message_data": "s8_lb" },
         "auto_max_value": { "message": "MaxTSetUBMaxTSetLB", "message_data": "s8_hb" },
-    },
-    "t_room_set": {
+    }),
+    "t_room_set": InputSchema({
         "description": "Current room temperature setpoint (informational)",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TrSet",
         "keep_updated": True,
         "message_data": "f8.8",
         "range": (-40, 127),
-    },
-    "t_room_set_ch2": {
+    }),
+    "t_room_set_ch2": InputSchema({
         "description": "Current room temperature setpoint on CH2 (informational)",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TrSetCH2",
         "keep_updated": True,
         "message_data": "f8.8",
         "range": (-40, 127),
-    },
-    "t_room": {
+    }),
+    "t_room": InputSchema({
         "description": "Current sensed room temperature (informational)",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "Tr",
         "keep_updated": True,
         "message_data": "f8.8",
         "range": (-40, 127),
-    },
-}
+    }),
+})
