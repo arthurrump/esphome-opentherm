@@ -1,16 +1,29 @@
 #pragma once
 
 #include "esphome/core/component.h"
-#include "esphome/components/sensor/sensor.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
-#include "esphome/components/number/number.h"
+#include "esphome/core/log.h"
 
 #include "OpenTherm.h"
 
-#include "sensor.h"
-#include "binary_sensor.h"
+#if defined(OPENTHERM_USE_INPUT_SENSOR) || defined(OPENTHERM_USE_SENSOR)
+#include "esphome/components/sensor/sensor.h"
+#endif //OPENTHERM_USE_INUPT_SENSOR || OPENTHERM_USE_SENSOR
+
+#ifdef OPENTHERM_USE_BINARY_SENSOR
+#include "esphome/components/binary_sensor/binary_sensor.h"
+#endif //OPENTHERM_USE_BINARY_SENSOR
+
+#ifdef OPENTHERM_USE_SWITCH
 #include "switch.h"
+#endif //OPENTHERM_USE_SWITCH
+
+#ifdef OPENTHERM_USE_NUMBER
+#include "number.h"
+#endif //OPENTHERM_USE_NUMBER
+
+#ifdef OPENTHERM_USE_OUTPUT
 #include "output.h"
+#endif //OPENTHERM_USE_OUTPUT
 
 #include <unordered_map>
 #include <unordered_set>
@@ -75,7 +88,7 @@ protected:
     // If more than one input is configured, the first one takes precedence
     float get_t_set_input(byte request_id);
 
-    void set_output_max_setpoint(float max_setpoint);
+    // void set_output_max_setpoint(float max_setpoint);
 
     // Create OpenTherm messages based on the message id
     unsigned int build_request(byte request_id);

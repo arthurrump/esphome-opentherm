@@ -3,23 +3,22 @@ import esphome.config_validation as cv
 from esphome.components import sensor
 from esphome.const import CONF_ID
 
-from components.opentherm.schema import OPENTHERM_SENSORS, SensorSchema
-from components.opentherm.validate import create_validation_schema
+from . import schema, validate
 from . import CONF_OPENTHERM_ID, OpenthermHub, cg_write_component_defines, cg_write_required_messages
 
 DEPENDENCIES = [ "opentherm" ]
 
-def get_entity_validation_schema(entity: SensorSchema) -> cv.Schema:
+def get_entity_validation_schema(entity: schema.SensorSchema) -> cv.Schema:
     return sensor.sensor_schema(
-        unit_of_measurement = entity["unit_of_measurement"] if "unit_of_measurement" in entity else cv._UNDEF,
+        unit_of_measurement = entity["unit_of_measurement"] if "unit_of_measurement" in entity else sensor._UNDEF,
         accuracy_decimals = entity["accuracy_decimals"],
-        icon = entity["icon"] if "icon" in entity else cv._UNDEF,
+        icon = entity["icon"] if "icon" in entity else sensor._UNDEF,
         state_class = entity["state_class"]
     )
 
 CONFIG_SCHEMA = \
     cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
-        .extend(create_validation_schema(OPENTHERM_SENSORS, get_entity_validation_schema)) \
+        .extend(validate.create_validation_schema(schema.OPENTHERM_SENSORS, get_entity_validation_schema)) \
         .extend(cv.COMPONENT_SCHEMA)
 
 def required_messages(sensor_keys):
@@ -77,6 +76,8 @@ def required_messages(sensor_keys):
     return messages
 
 async def to_code(config):
+    cg.add_define("OPENTHERM_USE_SENSOR")
+    
     hub = await cg.get_variable(config[CONF_OPENTHERM_ID])
 
     sensor_keys = []

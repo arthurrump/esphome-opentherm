@@ -17,13 +17,13 @@ int8_t get_low_s8(unsigned long response) {
     return (int8_t) ((response >> 8) & 0xff);
 }
 
-void OpenthermHub::set_output_max_setpoint(float max_setpoint) {
-#define OPENTHERM_SET_OUTPUT_MAX_SETPOINT(output) \
-    if (this->output ## _output != nullptr && this->output ## _output->auto_max_power) { \
-        output ## _output->set_max_power(max_setpoint / 100.); \
-    }
-    OPENTHERM_OUTPUT_LIST(OPENTHERM_SET_OUTPUT_MAX_SETPOINT, )
-}
+// void OpenthermHub::set_output_max_setpoint(float max_setpoint) {
+// #define OPENTHERM_SET_OUTPUT_MAX_SETPOINT(output) \
+//     if (this->output ## _output != nullptr && this->output ## _output->auto_max_power) { \
+//         output ## _output->set_max_power(max_setpoint / 100.); \
+//     }
+//     OPENTHERM_OUTPUT_LIST(OPENTHERM_SET_OUTPUT_MAX_SETPOINT, )
+// }
 
 unsigned int OpenthermHub::build_request(byte request_id) {
     switch (request_id) {
@@ -265,7 +265,7 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
             #ifdef OPENTHERM_HAS_SENSOR_max_t_set
             OPENTHERM_PUBLISH_SENSOR(max_t_set, ot->getFloat(response))
             #endif
-            this->set_output_max_setpoint(ot->getFloat(response));
+            // this->set_output_max_setpoint(ot->getFloat(response));
             break;
         case OpenThermMessageID::SConfigSMemberIDcode:
             #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_present

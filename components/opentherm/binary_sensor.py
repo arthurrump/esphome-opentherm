@@ -3,21 +3,24 @@ import esphome.config_validation as cv
 from esphome.components import binary_sensor
 from esphome.const import CONF_ID
 
-from components.opentherm.schema import OPENTHERM_BINARY_SENSORS, BinarySensorSchema
-from components.opentherm.validate import create_validation_schema
-from . import CONF_OPENTHERM_ID, OpenthermHub, cg_write_component_defines, cg_write_required_messages
+from . import (
+    schema, 
+    validate,
+    CONF_OPENTHERM_ID,
+    OpenthermHub, cg_write_component_defines, cg_write_required_messages
+)
 
 DEPENDENCIES = [ 'opentherm' ]
 
-def get_entity_validation_schema(entity: BinarySensorSchema) -> cv.Schema:
+def get_entity_validation_schema(entity: schema.BinarySensorSchema) -> cv.Schema:
     return binary_sensor.binary_sensor_schema(
-        device_class = entity["device_class"] if "device_class" in entity else cv._UNDEF,
-        icon = entity["icon"] if "icon" in entity else cv._UNDEF
+        device_class = entity["device_class"] if "device_class" in entity else binary_sensor._UNDEF,
+        icon = entity["icon"] if "icon" in entity else binary_sensor._UNDEF
     )
 
 CONFIG_SCHEMA = \
     cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
-        .extend(create_validation_schema(OPENTHERM_BINARY_SENSORS, get_entity_validation_schema)) \
+        .extend(validate.create_validation_schema(schema.OPENTHERM_BINARY_SENSORS, get_entity_validation_schema)) \
         .extend(cv.COMPONENT_SCHEMA)
 
 def required_messages(sensor_keys):
@@ -33,6 +36,8 @@ def required_messages(sensor_keys):
     return messages
 
 async def to_code(config):
+    cg.add_define("OPENTHERM_USE_BINARY_SENSOR")
+    
     hub = await cg.get_variable(config[CONF_OPENTHERM_ID])
 
     sensor_keys = []

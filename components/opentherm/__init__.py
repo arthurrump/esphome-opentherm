@@ -4,14 +4,9 @@ import esphome.config_validation as cv
 from esphome.components import sensor
 from esphome.const import CONF_ID
 
-AUTO_LOAD = [ 'binary_sensor', 'sensor', 'switch', 'number', 'output' ]
-MULTI_CONF = True
+from . import schema, validate
 
-def cv_inputs_schema(get_validator):
-    schema = {}
-    for key in input_keys:
-        schema[cv.Optional(key)] = get_validator(key)
-    return cv.Schema(schema)
+MULTI_CONF = True
 
 def cg_write_read_input_defines(keys, sensor_type):
     for key in keys:
@@ -32,7 +27,7 @@ CONFIG_SCHEMA = cv.All(
         cv.Optional("cooling_enable", False): cv.boolean,
         cv.Optional("otc_active", False): cv.boolean,
         cv.Optional("ch2_active", False): cv.boolean,
-    }).extend(cv_inputs_schema(lambda _: cv.use_id(sensor.Sensor)))
+    }).extend(validate.create_validation_schema(schema.OPENTHERM_INPUTS, (lambda _: cv.use_id(sensor.Sensor))))
       .extend(cv.COMPONENT_SCHEMA),
     cv.only_with_arduino,
 )
@@ -57,18 +52,21 @@ async def to_code(config):
     cg.add_global(cpp.RawStatement("void " + id + "_process_response(unsigned long response, OpenThermResponseStatus status) { " + id + "->process_response(response, status); }"))
     await cg.register_component(var, config)
 
+    input_sensors = []
     for key, value in config.items():
         if key != CONF_ID:
-            if is_input_key(key):
+            if key in schema.OPENTHERM_INPUTS:
                 sensor = await cg.get_variable(value)
                 cg.add(getattr(var, f"set_{key}_input_sensor")(sensor))
+                input_sensors.append(key)
             else:
                 cg.add(getattr(var, f"set_{key}")(value))
 
-    input_sensors = list(filter(is_input_key, config.keys()))
     if len(input_sensors) > 0:
+        cg.add_define("OPENTHERM_USE_INPUT_SENSOR")
+        cg.add_define("USE_SENSOR")
         cg_write_component_defines("INPUT_SENSOR", input_sensors)
-        cg_write_required_messages(var, input_required_messages(input_sensors))
+        # cg_write_required_messages(var, input_required_messages(input_sensors))
         cg_write_read_input_defines(input_sensors, "input_sensor")
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.3")

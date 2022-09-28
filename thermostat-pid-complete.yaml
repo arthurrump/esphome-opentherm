@@ -43,13 +43,13 @@ output:
   - platform: opentherm
     t_set:
       id: t_set
-      min_power: 20%
-      auto_max_power: true
+      min_value: 20
+      auto_max_value: true
       zero_means_zero: true
     t_set_ch2:
       id: t_set_ch2
-      min_power: 20%
-      max_power: 40%
+      min_value: 20
+      max_value: 40
       zero_means_zero: true
 
 # Numbers to set the boiler central heating water temperature

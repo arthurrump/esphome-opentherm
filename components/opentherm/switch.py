@@ -3,8 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import switch
 from esphome.const import CONF_ID
 
-from components.opentherm.schema import OPENTHERM_SWITCHES, SwitchSchema
-from components.opentherm.validate import create_validation_schema
+from . import schema, validate
 from . import CONF_OPENTHERM_ID, OpenthermHub, opentherm_ns, cg_write_component_defines, cg_write_required_messages
 
 DEPENDENCIES = [ "opentherm" ]
@@ -19,7 +18,7 @@ async def new_ot_switch(config, *args):
 
 CONF_MODE = "mode"
 
-def get_entity_validation_schema(entity: SwitchSchema) -> cv.Schema:
+def get_entity_validation_schema(entity: schema.SwitchSchema) -> cv.Schema:
     return switch.SWITCH_SCHEMA.extend({
         cv.GenerateID(): cv.declare_id(OpenthermSwitch),
         cv.Optional(CONF_MODE, entity["default_mode"]): 
@@ -33,7 +32,7 @@ def get_entity_validation_schema(entity: SwitchSchema) -> cv.Schema:
 
 CONFIG_SCHEMA = \
     cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
-        .extend(create_validation_schema(OPENTHERM_SWITCHES, get_entity_validation_schema)) \
+        .extend(validate.create_validation_schema(schema.OPENTHERM_SWITCHES, get_entity_validation_schema)) \
         .extend(cv.COMPONENT_SCHEMA)
 
 def required_messages(keys):
@@ -45,6 +44,8 @@ def required_messages(keys):
     return messages
 
 async def to_code(config):
+    cg.add_define("OPENTHERM_USE_SWITCH")
+
     hub = await cg.get_variable(config[CONF_OPENTHERM_ID])
 
     keys = []
