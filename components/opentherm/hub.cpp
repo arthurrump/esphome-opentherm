@@ -1,81 +1,108 @@
 #include "hub.h"
 
 namespace esphome {
+
 namespace opentherm {
 
 static const char *TAG = "opentherm";
 
-int16_t get_s16(unsigned long response) {
-    return (int16_t) (response & 0xffff);
+bool parse_flag8_lb_0(const unsigned long response) { return response & 0b0000000000000001; }
+bool parse_flag8_lb_1(const unsigned long response) { return response & 0b0000000000000010; }
+bool parse_flag8_lb_2(const unsigned long response) { return response & 0b0000000000000100; }
+bool parse_flag8_lb_3(const unsigned long response) { return response & 0b0000000000001000; }
+bool parse_flag8_lb_4(const unsigned long response) { return response & 0b0000000000010000; }
+bool parse_flag8_lb_5(const unsigned long response) { return response & 0b0000000000100000; }
+bool parse_flag8_lb_6(const unsigned long response) { return response & 0b0000000001000000; }
+bool parse_flag8_lb_7(const unsigned long response) { return response & 0b0000000010000000; }
+bool parse_flag8_hb_0(const unsigned long response) { return response & 0b0000000100000000; }
+bool parse_flag8_hb_1(const unsigned long response) { return response & 0b0000001000000000; }
+bool parse_flag8_hb_2(const unsigned long response) { return response & 0b0000010000000000; }
+bool parse_flag8_hb_3(const unsigned long response) { return response & 0b0000100000000000; }
+bool parse_flag8_hb_4(const unsigned long response) { return response & 0b0001000000000000; }
+bool parse_flag8_hb_5(const unsigned long response) { return response & 0b0010000000000000; }
+bool parse_flag8_hb_6(const unsigned long response) { return response & 0b0100000000000000; }
+bool parse_flag8_hb_7(const unsigned long response) { return response & 0b1000000000000000; }
+uint8_t parse_u8_lb(const unsigned long response) { return (uint8_t) (response & 0xff); }
+uint8_t parse_u8_hb(const unsigned long response) { return (uint8_t) ((response >> 8) & 0xff); }
+int8_t parse_s8_lb(const unsigned long response) { return (int8_t) (response & 0xff); }
+int8_t parse_s8_hb(const unsigned long response) { return (int8_t) ((response >> 8) & 0xff); }
+uint16_t parse_u16(const unsigned long response) { return (uint16_t) (response & 0xffff); }
+int16_t parse_s16(const unsigned long response) { return (int16_t) (response & 0xffff); }
+float parse_f88(const unsigned long response) {
+    unsigned int data = response & 0xffff;
+    return (data & 0x8000) ? -(0x10000L - data) / 256.0f : data / 256.0f; 
 }
 
-int8_t get_high_s8(unsigned long response) {
-    return (int8_t) (response & 0xff);
-}
+unsigned int write_flag8_lb_0(const bool value, const unsigned int data) { return value ? data | 0b0000000000000001 : data & 0b1111111111111110; }
+unsigned int write_flag8_lb_1(const bool value, const unsigned int data) { return value ? data | 0b0000000000000010 : data & 0b1111111111111101; }
+unsigned int write_flag8_lb_2(const bool value, const unsigned int data) { return value ? data | 0b0000000000000100 : data & 0b1111111111111011; }
+unsigned int write_flag8_lb_3(const bool value, const unsigned int data) { return value ? data | 0b0000000000001000 : data & 0b1111111111110111; }
+unsigned int write_flag8_lb_4(const bool value, const unsigned int data) { return value ? data | 0b0000000000010000 : data & 0b1111111111101111; }
+unsigned int write_flag8_lb_5(const bool value, const unsigned int data) { return value ? data | 0b0000000000100000 : data & 0b1111111111011111; }
+unsigned int write_flag8_lb_6(const bool value, const unsigned int data) { return value ? data | 0b0000000001000000 : data & 0b1111111110111111; }
+unsigned int write_flag8_lb_7(const bool value, const unsigned int data) { return value ? data | 0b0000000010000000 : data & 0b1111111101111111; }
+unsigned int write_flag8_hb_0(const bool value, const unsigned int data) { return value ? data | 0b0000000100000000 : data & 0b1111111011111111; }
+unsigned int write_flag8_hb_1(const bool value, const unsigned int data) { return value ? data | 0b0000001000000000 : data & 0b1111110111111111; }
+unsigned int write_flag8_hb_2(const bool value, const unsigned int data) { return value ? data | 0b0000010000000000 : data & 0b1111101111111111; }
+unsigned int write_flag8_hb_3(const bool value, const unsigned int data) { return value ? data | 0b0000100000000000 : data & 0b1111011111111111; }
+unsigned int write_flag8_hb_4(const bool value, const unsigned int data) { return value ? data | 0b0001000000000000 : data & 0b1110111111111111; }
+unsigned int write_flag8_hb_5(const bool value, const unsigned int data) { return value ? data | 0b0010000000000000 : data & 0b1101111111111111; }
+unsigned int write_flag8_hb_6(const bool value, const unsigned int data) { return value ? data | 0b0100000000000000 : data & 0b1011111111111111; }
+unsigned int write_flag8_hb_7(const bool value, const unsigned int data) { return value ? data | 0b1000000000000000 : data & 0b0111111111111111; }
+unsigned int write_u8_lb(const uint8_t value, const unsigned int data) { return (data & 0xff00) | value; }
+unsigned int write_u8_hb(const uint8_t value, const unsigned int data) { return (data & 0x00ff) | (value << 8); }
+unsigned int write_s8_lb(const int8_t value, const unsigned int data) { return (data & 0xff00) | value; }
+unsigned int write_s8_hb(const int8_t value, const unsigned int data) { return (data & 0x00ff) | (value << 8); }
+unsigned int write_u16(const uint16_t value, const unsigned int data) { return value; }
+unsigned int write_s16(const int16_t value, const unsigned int data) { return value; }
+unsigned int write_f88(const float value, const unsigned int data) { return (unsigned int) (value * 256.0f); }
 
-int8_t get_low_s8(unsigned long response) {
-    return (int8_t) ((response >> 8) & 0xff);
-}
-
-// void OpenthermHub::set_output_max_setpoint(float max_setpoint) {
-// #define OPENTHERM_SET_OUTPUT_MAX_SETPOINT(output) \
-//     if (this->output ## _output != nullptr && this->output ## _output->auto_max_power) { \
-//         output ## _output->set_max_power(max_setpoint / 100.); \
-//     }
-//     OPENTHERM_OUTPUT_LIST(OPENTHERM_SET_OUTPUT_MAX_SETPOINT, )
-// }
-
-unsigned int OpenthermHub::build_request(byte request_id) {
-    switch (request_id) {
-        case OpenThermMessageID::Status:
-            ESP_LOGD(TAG, "Building Status request");
-            return ot->buildSetBoilerStatusRequest(this->ch_enable, this->dhw_enable, this->cooling_enable, this->otc_active, this->ch2_active);
-        #ifdef OPENTHERM_READ_INPUT_t_set
-        case OpenThermMessageID::TSet: {
-            float target_temp = OPENTHERM_READ_INPUT_t_set;
-            ESP_LOGD(TAG, "Building request to set target temperature at %.1f", target_temp);
-            unsigned int data = ot->temperatureToData(target_temp);
-            return ot->buildRequest(OpenThermMessageType::WRITE_DATA, (OpenThermMessageID)request_id, data);
-        }
-        #endif
-        #ifdef OPENTHERM_READ_INPUT_t_set_ch2
-        case OpenThermMessageID::TsetCH2: {
-            float target_temp = OPENTHERM_READ_INPUT_t_set_ch2;
-            ESP_LOGD(TAG, "Building request to set target temperature at %.1f", target_temp);
-            unsigned int data = ot->temperatureToData(target_temp);
-            return ot->buildRequest(OpenThermMessageType::WRITE_DATA, (OpenThermMessageID)request_id, data);
-        }
-        #endif
-        case OpenThermMessageID::RelModLevel:
-        case OpenThermMessageID::CHPressure:
-        case OpenThermMessageID::DHWFlowRate:
-        case OpenThermMessageID::Tboiler:
-        case OpenThermMessageID::Tdhw:
-        case OpenThermMessageID::Toutside:
-        case OpenThermMessageID::Tret:
-        case OpenThermMessageID::Tstorage:
-        case OpenThermMessageID::Tcollector:
-        case OpenThermMessageID::TflowCH2:
-        case OpenThermMessageID::Tdhw2:
-        case OpenThermMessageID::Texhaust:
-        case OpenThermMessageID::BurnerStarts:
-        case OpenThermMessageID::CHPumpStarts:
-        case OpenThermMessageID::DHWPumpValveStarts:
-        case OpenThermMessageID::DHWBurnerStarts:
-        case OpenThermMessageID::BurnerOperationHours:
-        case OpenThermMessageID::CHPumpOperationHours:
-        case OpenThermMessageID::DHWPumpValveOperationHours:
-        case OpenThermMessageID::DHWBurnerOperationHours:
-        case OpenThermMessageID::TdhwSetUBTdhwSetLB:
-        case OpenThermMessageID::MaxTSetUBMaxTSetLB:
-        case OpenThermMessageID::TdhwSet:
-        case OpenThermMessageID::MaxTSet:
-        case OpenThermMessageID::SConfigSMemberIDcode:
-        case OpenThermMessageID::RBPflags:
-            ESP_LOGD(TAG, "Building simple read request with id %d", request_id);
-            return ot->buildRequest(OpenThermMessageType::READ_DATA, (OpenThermMessageID)request_id, 0);
+#define OPENTHERM_MESSAGE_WRITE_MESSAGE(msg) \
+    case OpenThermMessageID::msg: { \
+        ESP_LOGD(TAG, "Building %s write request", #msg); \
+        unsigned int data = 0;
+#define OPENTHERM_MESSAGE_WRITE_ENTITY(key, message_data) \
+        data = write_ ## message_data(this->key->state, data);
+#define OPENTHERM_MESSAGE_WRITE_POSTSCRIPT \
+        return ot->buildRequest(OpenThermMessageType::WRITE_DATA, request_id, data); \
     }
-    ESP_LOGE(TAG, "Tried to create a request with unknown id %d", request_id);
+
+#define OPENTHERM_MESSAGE_READ_MESSAGE(msg) \
+    case OpenThermMessageID::msg: \
+    ESP_LOGD(TAG, "Building %s read request", #msg); \
+    return ot->buildRequest(OpenThermMessageType::READ_DATA, request_id, 0);
+
+unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
+    // First, handle the status request. This requires special logic, because we
+    // wouldn't want to inadvertently disable domestic hot water, for example.
+    // It is also included in the macro-generated code below, but that will
+    // never be executed, because we short-circuit it here. 
+    if (request_id == OpenThermMessageID::Status) {
+        ESP_LOGD(TAG, "Building Status request");
+        return ot->buildSetBoilerStatusRequest(this->ch_enable, this->dhw_enable, this->cooling_enable, this->otc_active, this->ch2_active);
+    }
+
+    // Next, we start with the write requests from switches and other inputs,
+    // because we would want to write that data if it is available, rather than
+    // request a read for that type (in the case that both read and write are
+    // supported).
+    switch (request_id) {
+        OPENTHERM_SWITCH_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_WRITE_MESSAGE, OPENTHERM_MESSAGE_WRITE_ENTITY, , OPENTHERM_MESSAGE_WRITE_POSTSCRIPT, )
+        OPENTHERM_NUMBER_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_WRITE_MESSAGE, OPENTHERM_MESSAGE_WRITE_ENTITY, , OPENTHERM_MESSAGE_WRITE_POSTSCRIPT, )
+        OPENTHERM_OUTPUT_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_WRITE_MESSAGE, OPENTHERM_MESSAGE_WRITE_ENTITY, , OPENTHERM_MESSAGE_WRITE_POSTSCRIPT, )
+        OPENTHERM_INPUT_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_WRITE_MESSAGE, OPENTHERM_MESSAGE_WRITE_ENTITY, , OPENTHERM_MESSAGE_WRITE_POSTSCRIPT, )
+    }
+
+    // Finally, handle the simple read requests, which only change with the message id.
+    switch (request_id) {
+        OPENTHERM_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_READ_MESSAGE, , , , )
+        OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_READ_MESSAGE, , , , )
+    }
+
+    // And if we get here, a message was requested which somehow wasn't handled.
+    // This shouldn't happen due to the way the defines are configured, so we
+    // log an error and just return a 0 message.
+    ESP_LOGE(TAG, "Tried to create a request with unknown id %d. This should never happen, so please open an issue.", request_id);
     return 0;
 }
 
@@ -87,17 +114,17 @@ void IRAM_ATTR OpenthermHub::handle_interrupt() {
     this->ot->handleInterrupt();
 }
 
-#define OPENTHERM_PUBLISH_SENSOR(name, state) \
-    if (this->name ## _sensor != nullptr) { \
-        this->name ## _sensor->publish_state(state); \
-    }
-
-#define OPENTHERM_PUBLISH_BINARY_SENSOR(name, state) \
-    if (this->name ## _binary_sensor != nullptr) { \
-        this->name ## _binary_sensor->publish_state(state); \
-    }
+// Define the handler helpers to publish the results to all sensors
+#define OPENTHERM_MESSAGE_RESPONSE_MESSAGE(msg) \
+    case OpenThermMessageID::msg: \
+        ESP_LOGD(TAG, "Received %s response", #msg);
+#define OPENTHERM_MESSAGE_RESPONSE_ENTITY(key, message_data) \
+        this->key->publish_state(parse_ ## message_data(response));
+#define OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT \
+        break;
 
 void OpenthermHub::process_response(unsigned long response, OpenThermResponseStatus status) {
+    // First check if the response is valid and short-circuit execution if it isn't.
     if (!ot->isValidResponse(response)) {
         ESP_LOGW(
             TAG, 
@@ -108,202 +135,18 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
         return;
     }
 
+    // Read the second byte of the response, which is the message id.
     byte id = (response >> 16 & 0xFF);
-
     ESP_LOGD(TAG, "Received OpenTherm response with id %d: %s", id, String(response, HEX).c_str());
 
+    // Then use those to create a switch statement for each thing we would want
+    // to report. We use a separate switch statement for each type, because some
+    // messages include results for multiple types, like flags and a number.
     switch (id) {
-        case OpenThermMessageID::Status:
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_fault_indication
-            OPENTHERM_PUBLISH_BINARY_SENSOR(fault_indication, ot->isFault(response))
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_ch_active
-            OPENTHERM_PUBLISH_BINARY_SENSOR(ch_active, ot->isCentralHeatingActive(response))
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_active
-            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_active, ot->isHotWaterActive(response))
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_flame_on
-            OPENTHERM_PUBLISH_BINARY_SENSOR(flame_on, ot->isFlameOn(response))
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_cooling_active
-            OPENTHERM_PUBLISH_BINARY_SENSOR(cooling_active, ot->isCoolingActive(response))
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_ch2_active
-            OPENTHERM_PUBLISH_BINARY_SENSOR(ch2_active, response & 0x20)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_diagnostic_indication
-            OPENTHERM_PUBLISH_BINARY_SENSOR(diagnostic_indication, ot->isDiagnostic(response))
-            #endif
-            break;
-        case OpenThermMessageID::TSet:
-        case OpenThermMessageID::TsetCH2:
-            ESP_LOGD(TAG, "Response temperature: %.1f", ot->getFloat(response));
-            break;
-        #ifdef OPENTHERM_HAS_SENSOR_rel_mod_level
-        case OpenThermMessageID::RelModLevel:
-            OPENTHERM_PUBLISH_SENSOR(rel_mod_level, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_ch_pressure
-        case OpenThermMessageID::CHPressure:
-            OPENTHERM_PUBLISH_SENSOR(ch_pressure, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_dhw_flow_rate
-        case OpenThermMessageID::DHWFlowRate:
-            OPENTHERM_PUBLISH_SENSOR(dhw_flow_rate, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_boiler
-        case OpenThermMessageID::Tboiler:
-            OPENTHERM_PUBLISH_SENSOR(t_boiler, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_dhw
-        case OpenThermMessageID::Tdhw:
-            OPENTHERM_PUBLISH_SENSOR(t_dhw, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_outside
-        case OpenThermMessageID::Toutside:
-            OPENTHERM_PUBLISH_SENSOR(t_outside, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_ret
-        case OpenThermMessageID::Tret:
-            OPENTHERM_PUBLISH_SENSOR(t_ret, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_storage
-        case OpenThermMessageID::Tstorage:
-            OPENTHERM_PUBLISH_SENSOR(t_storage, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_collector
-        case OpenThermMessageID::Tcollector:
-            OPENTHERM_PUBLISH_SENSOR(t_collector, get_s16(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_flow_ch2
-        case OpenThermMessageID::TflowCH2:
-            OPENTHERM_PUBLISH_SENSOR(t_flow_ch2, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_dhw2
-        case OpenThermMessageID::Tdhw2:
-            OPENTHERM_PUBLISH_SENSOR(t_dhw2, ot->getFloat(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_t_exhaust
-        case OpenThermMessageID::Texhaust:
-            OPENTHERM_PUBLISH_SENSOR(t_exhaust, get_s16(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_burner_starts
-        case OpenThermMessageID::BurnerStarts:
-            OPENTHERM_PUBLISH_SENSOR(burner_starts, ot->getUInt(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_ch_pump_starts
-        case OpenThermMessageID::CHPumpStarts:
-            OPENTHERM_PUBLISH_SENSOR(ch_pump_starts, ot->getUInt(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_dhw_pump_valve_starts
-        case OpenThermMessageID::DHWPumpValveStarts:
-            OPENTHERM_PUBLISH_SENSOR(dhw_pump_valve_starts, ot->getUInt(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_dhw_burner_starts
-        case OpenThermMessageID::DHWBurnerStarts:
-            OPENTHERM_PUBLISH_SENSOR(dhw_burner_starts, ot->getUInt(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_burner_operation_hours
-        case OpenThermMessageID::BurnerOperationHours:
-            OPENTHERM_PUBLISH_SENSOR(burner_operation_hours, ot->getUInt(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_ch_pump_operation_hours
-        case OpenThermMessageID::CHPumpOperationHours:
-            OPENTHERM_PUBLISH_SENSOR(ch_pump_operation_hours, ot->getUInt(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_dhw_pump_valve_operation_hours
-        case OpenThermMessageID::DHWPumpValveOperationHours:
-            OPENTHERM_PUBLISH_SENSOR(dhw_pump_valve_operation_hours, ot->getUInt(response))
-            break;
-        #endif
-        #ifdef OPENTHERM_HAS_SENSOR_dhw_burner_operation_hours
-        case OpenThermMessageID::DHWBurnerOperationHours:
-            OPENTHERM_PUBLISH_SENSOR(dhw_burner_operation_hours, ot->getUInt(response))
-            break;
-        #endif
-        case OpenThermMessageID::TdhwSetUBTdhwSetLB:
-            #ifdef OPENTHERM_HAS_SENSOR_t_dhw_set_ub
-            OPENTHERM_PUBLISH_SENSOR(t_dhw_set_ub, get_high_s8(response))
-            #endif
-            #ifdef OPENTHERM_HAS_SENSOR_t_dhw_set_lb
-            OPENTHERM_PUBLISH_SENSOR(t_dhw_set_lb, get_low_s8(response))
-            #endif
-            break;
-        case OpenThermMessageID::MaxTSetUBMaxTSetLB:
-            #ifdef OPENTHERM_HAS_SENSOR_max_t_set_ub
-            OPENTHERM_PUBLISH_SENSOR(max_t_set_ub, get_high_s8(response))
-            #endif
-            #ifdef OPENTHERM_HAS_SENSOR_max_t_set_lb
-            OPENTHERM_PUBLISH_SENSOR(max_t_set_lb, get_low_s8(response))
-            #endif
-            break;
-        #ifdef OPENTHERM_HAS_SENSOR_t_dhw_set
-        case OpenThermMessageID::TdhwSet:
-            OPENTHERM_PUBLISH_SENSOR(t_dhw_set, ot->getFloat(response))
-            break;
-        #endif
-        case OpenThermMessageID::MaxTSet:
-            #ifdef OPENTHERM_HAS_SENSOR_max_t_set
-            OPENTHERM_PUBLISH_SENSOR(max_t_set, ot->getFloat(response))
-            #endif
-            // this->set_output_max_setpoint(ot->getFloat(response));
-            break;
-        case OpenThermMessageID::SConfigSMemberIDcode:
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_present
-            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_present, response & 0x1)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_control_type_on_off
-            OPENTHERM_PUBLISH_BINARY_SENSOR(control_type_on_off, response & 0x2)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_cooling_supported
-            OPENTHERM_PUBLISH_BINARY_SENSOR(cooling_supported, response & 0x4)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_storage_tank
-            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_storage_tank, response & 0x8)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_master_pump_control_allowed
-            OPENTHERM_PUBLISH_BINARY_SENSOR(master_pump_control_allowed, response & 0x10)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_ch2_present
-            OPENTHERM_PUBLISH_BINARY_SENSOR(ch2_present, response & 0x20)
-            #endif
-            break;
-        case OpenThermMessageID::RBPflags:
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_setpoint_transfer_enabled
-            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_setpoint_transfer_enabled, response & 0x1)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_max_ch_setpoint_transfer_enabled
-            OPENTHERM_PUBLISH_BINARY_SENSOR(max_ch_setpoint_transfer_enabled, response & 0x2)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_dhw_setpoint_rw
-            OPENTHERM_PUBLISH_BINARY_SENSOR(dhw_setpoint_rw, (response >> 8) & 0x1)
-            #endif
-            #ifdef OPENTHERM_HAS_BINARY_SENSOR_max_ch_setpoint_rw
-            OPENTHERM_PUBLISH_BINARY_SENSOR(max_ch_setpoint_rw, (response >> 8) & 0x2)
-            #endif
-            break;
-        default:
-            ESP_LOGW(TAG, "This response was not expected.");
-            break;
+        OPENTHERM_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
+    }
+    switch (id) {
+        OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
     }
 }
 
@@ -315,9 +158,9 @@ void OpenthermHub::setup() {
     // Ensure that there is at least one request, as we are required to
     // communicate at least once every second. Sending the status request is
     // good practice anyway.
-    this->add_repeating_request(OpenThermMessageID::Status);
+    this->add_repeating_message(OpenThermMessageID::Status);
 
-    this->current_request_iterator = this->initial_requests.begin();
+    this->current_message_iterator = this->initial_messages.begin();
 }
 
 void OpenthermHub::on_shutdown() {
@@ -326,17 +169,17 @@ void OpenthermHub::on_shutdown() {
 
 void OpenthermHub::loop() {
     if (this->ot->isReady()) {
-        if (this->initializing && this->current_request_iterator == this->initial_requests.end()) {
+        if (this->initializing && this->current_message_iterator == this->initial_messages.end()) {
             this->initializing = false;
-            this->current_request_iterator = this->repeating_requests.begin();
-        } else if (this->current_request_iterator == this->repeating_requests.end()) {
-            this->current_request_iterator = this->repeating_requests.begin();
+            this->current_message_iterator = this->repeating_messages.begin();
+        } else if (this->current_message_iterator == this->repeating_messages.end()) {
+            this->current_message_iterator = this->repeating_messages.begin();
         }
 
-        unsigned int request = this->build_request(*this->current_request_iterator);
+        unsigned int request = this->build_request(*this->current_message_iterator);
         this->ot->sendRequestAync(request);
         ESP_LOGD(TAG, "Sent OpenTherm request: %s", String(request, HEX).c_str());
-        this->current_request_iterator++;
+        this->current_message_iterator++;
         
         this->ot->process();
     }
@@ -357,11 +200,11 @@ void OpenthermHub::dump_config() {
     ESP_LOGCONFIG(TAG, "  Outputs: %s", SHOW(OPENTHERM_OUTPUT_LIST(ID, )));
     ESP_LOGCONFIG(TAG, "  Numbers: %s", SHOW(OPENTHERM_NUMBER_LIST(ID, )));
     ESP_LOGCONFIG(TAG, "  Initial requests:");
-    for (auto type : this->initial_requests) {
+    for (auto type : this->initial_messages) {
         ESP_LOGCONFIG(TAG, "  - %d", type);
     }
     ESP_LOGCONFIG(TAG, "  Repeating requests:");
-    for (auto type : this->repeating_requests) {
+    for (auto type : this->repeating_messages) {
         ESP_LOGCONFIG(TAG, "  - %d", type);
     }
 }

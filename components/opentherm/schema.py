@@ -39,7 +39,9 @@ class EntitySchema(TypedDict):
                              at position 0 to 7
       - u8_[hb|lb]: data is an unsigned 8-bit integer, 
                     in the high (hb) or low byte (lb)
-      - f8.8: data is a signed fixed point value with 
+      - s8_[hb|lb]: data is an signed 8-bit integer, 
+                    in the high (hb) or low byte (lb)
+      - f88: data is a signed fixed point value with 
               1 sign bit, 7 integer bits, 8 fractional bits
       - u16: data is an unsigned 16-bit integer
       - s16: data is a signed 16-bit integer
@@ -61,7 +63,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "RelModLevel",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "ch_pressure": SensorSchema({
         "description": "Water pressure in CH circuit",
@@ -71,7 +73,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "CHPressure",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "dhw_flow_rate": SensorSchema({
         "description": "Water flow rate in DHW circuit",
@@ -81,7 +83,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "DHWFlowRate",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_boiler": SensorSchema({
         "description": "Boiler water temperature",
@@ -91,7 +93,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "Tboiler",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_dhw": SensorSchema({
         "description": "DHW temperature",
@@ -101,7 +103,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "Tdhw",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_outside": SensorSchema({
         "description": "Outside temperature",
@@ -111,7 +113,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "Toutside",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_ret": SensorSchema({
         "description": "Return water temperature",
@@ -121,7 +123,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "Tret",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_storage": SensorSchema({
         "description": "Solar storage temperature",
@@ -131,7 +133,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "Tstorage",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_collector": SensorSchema({
         "description": "Solar collector temperature",
@@ -151,7 +153,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "TflowCH2",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_dhw2": SensorSchema({
         "description": "Domestic hot water temperature 2",
@@ -161,7 +163,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "Tdhw2",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "t_exhaust": SensorSchema({
         "description": "Boiler exhaust temperature",
@@ -293,7 +295,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "TdhwSet",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
     "max_t_set": SensorSchema({
         "description": "Maximum allowable CH water setpoint",
@@ -303,7 +305,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "state_class": STATE_CLASS_MEASUREMENT,
         "message": "MaxTSet",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
     }),
 })
 
@@ -483,25 +485,25 @@ INPUTS: Schema[InputSchema] = Schema({
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TSet",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (0, 100),
-        "auto_max_value": { "message": "MaxTSet", "message_data": "f8.8" },
+        "auto_max_value": { "message": "MaxTSet", "message_data": "f88" },
     }),
     "t_set_ch2": InputSchema({
         "description": "Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit",
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TsetCH2",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (0, 100),
-        "auto_max_value": { "message": "MaxTSet", "message_data": "f8.8" },
+        "auto_max_value": { "message": "MaxTSet", "message_data": "f88" },
     }),
     "cooling_control": InputSchema({
         "description": "Cooling control signal",
         "unit_of_measurement": UNIT_PERCENT,
         "message": "CoolingControl",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (0, 100),
     }),
     "t_dhw_set": InputSchema({
@@ -509,7 +511,7 @@ INPUTS: Schema[InputSchema] = Schema({
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TdhwSet",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (0, 127),
         "auto_min_value": { "message": "TdhwSetUBTdhwSetLB", "message_data": "s8_lb" },
         "auto_max_value": { "message": "TdhwSetUBTdhwSetLB", "message_data": "s8_hb" },
@@ -519,7 +521,7 @@ INPUTS: Schema[InputSchema] = Schema({
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "MaxTSet",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (0, 127),
         "auto_min_value": { "message": "MaxTSetUBMaxTSetLB", "message_data": "s8_lb" },
         "auto_max_value": { "message": "MaxTSetUBMaxTSetLB", "message_data": "s8_hb" },
@@ -529,7 +531,7 @@ INPUTS: Schema[InputSchema] = Schema({
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TrSet",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (-40, 127),
     }),
     "t_room_set_ch2": InputSchema({
@@ -537,7 +539,7 @@ INPUTS: Schema[InputSchema] = Schema({
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "TrSetCH2",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (-40, 127),
     }),
     "t_room": InputSchema({
@@ -545,7 +547,7 @@ INPUTS: Schema[InputSchema] = Schema({
         "unit_of_measurement": UNIT_CELSIUS,
         "message": "Tr",
         "keep_updated": True,
-        "message_data": "f8.8",
+        "message_data": "f88",
         "range": (-40, 127),
     }),
 })

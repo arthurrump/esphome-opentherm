@@ -29,7 +29,9 @@ def define_message_handler(component_type: str, keys: List[str], schema_: schema
     #     break;
     # // Building a message for a write request
     # case OpenthermMessageID::Message: {
-    #     unsigned int data = write_message_data(some_input_sensor->state); // Where input_sensor can also be a number/output/switch
+    #     unsigned int data = 0;
+    #     data = write_flag8_lb_0(some_input_switch->state, data); // Where input_sensor can also be a number/output/switch
+    #     data = write_u8_hb(some_number->state, data);
     #     return ot->buildRequest(OpenthermMessageType::WriteData, OpenthermMessageID::Message, data);
     # }
 
@@ -39,19 +41,20 @@ def define_message_handler(component_type: str, keys: List[str], schema_: schema
     messages: Dict[str, List[Tuple[str, str]]] = {}
     for key in keys:
         msg = schema_[key]["message"]
-        if msg != "Status": # Status is special, and will be handled separately
-            if msg not in messages:
-                messages[msg] = []
-            messages[msg].append((key, schema_[key]["message_data"]))
+        if msg not in messages:
+            messages[msg] = []
+        messages[msg].append((key, schema_[key]["message_data"]))
 
     cg.add_define(
         f"OPENTHERM_{component_type.upper()}_MESSAGE_HANDLERS(MESSAGE, ENTITY, entity_sep, postscript, msg_sep)",
-        " msg_sep ".join([ 
-            f"MESSAGE({msg}) "
-            + " entity_sep ".join([ f"ENTITY({key}_{component_type.lower()}, {msg_data})" for key, msg_data in keys ])
-            + " postscript"
-            for msg, keys in messages.items()
-        ])
+        cg.RawExpression(
+            " msg_sep ".join([ 
+                f"MESSAGE({msg}) "
+                + " entity_sep ".join([ f"ENTITY({key}_{component_type.lower()}, {msg_data})" for key, msg_data in keys ])
+                + " postscript"
+                for msg, keys in messages.items()
+            ])
+        )
     )
 
 def add_messages(hub: cg.MockObj, keys: List[str], schema_: schema.Schema[TSchema]):
