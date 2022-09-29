@@ -21,24 +21,29 @@ class Schema(Generic[T], Dict[str, T]):
     pass
 
 class EntitySchema(TypedDict):
-    # Description of the item, based on the OpenTherm spec
     description: str
-    # OpenTherm message id used to read or write the value
+    """Description of the item, based on the OpenTherm spec"""
+
     message: str
-    # Whether the value should be read or write repeatedly (True) or only during
-    # the initialization phase (False)
+    """OpenTherm message id used to read or write the value"""
+
     keep_updated: bool
-    # Instructions on how to interpret the data in the message
-    #   - flag8_[hb|lb]_[0-7]: data is a byte of single bit flags, 
-    #                          this flag is set in the high (hb) or low byte (lb),
-    #                          at position 0 to 7
-    #   - u8_[hb|lb]: data is an unsigned 8-bit integer, 
-    #                 in the high (hb) or low byte (lb)
-    #   - f8.8: data is a signed fixed point value with 
-    #           1 sign bit, 7 integer bits, 8 fractional bits
-    #   - u16: data is an unsigned 16-bit integer
-    #   - s16: data is a signed 16-bit integer
+    """Whether the value should be read or write repeatedly (True) or only during
+    the initialization phase (False)
+    """
+
     message_data: str
+    """Instructions on how to interpret the data in the message
+      - flag8_[hb|lb]_[0-7]: data is a byte of single bit flags, 
+                             this flag is set in the high (hb) or low byte (lb),
+                             at position 0 to 7
+      - u8_[hb|lb]: data is an unsigned 8-bit integer, 
+                    in the high (hb) or low byte (lb)
+      - f8.8: data is a signed fixed point value with 
+              1 sign bit, 7 integer bits, 8 fractional bits
+      - u16: data is an unsigned 16-bit integer
+      - s16: data is a signed 16-bit integer
+    """
 
 class SensorSchema(EntitySchema):
     unit_of_measurement: NotRequired[str]

@@ -20,8 +20,9 @@ CONFIG_SCHEMA = \
         .extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config: Dict[str, Any]) -> None:
-    await generate.generic_to_code(
-        COMPONENT_TYPE, 
+    await generate.component_to_code(
+        COMPONENT_TYPE,
+        schema.BINARY_SENSORS,
         binary_sensor.BinarySensor, 
         lambda _, conf: binary_sensor.new_binary_sensor(conf), 
         config

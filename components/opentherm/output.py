@@ -32,8 +32,9 @@ CONFIG_SCHEMA = \
         .extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config: Dict[str, Any]) -> None:
-    await generate.generic_to_code(
+    await generate.component_to_code(
         COMPONENT_TYPE, 
+        schema.INPUTS,
         OpenthermOutput, 
         lambda _, conf: new_openthermoutput(conf), 
         config
