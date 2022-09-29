@@ -3,7 +3,10 @@ from typing import Any, Awaitable, Callable, Dict, List, Set, Tuple, TypeVar
 import esphome.codegen as cg
 from esphome.const import CONF_ID
 
-from . import schema, CONF_OPENTHERM_ID
+from . import const, schema
+
+opentherm_ns = cg.esphome_ns.namespace("esphome::opentherm")
+OpenthermHub = opentherm_ns.class_("OpenthermHub", cg.Component)
 
 def define_has_component(component_type: str, keys: List[str]) -> None:
     cg.add_define(
@@ -62,10 +65,15 @@ def add_messages(hub: cg.MockObj, keys: List[str], schema_: schema.Schema[TSchem
         else:
             cg.add(hub.add_initial_message(msg_expr))
 
-async def component_to_code(component_type: str, schema_: schema.Schema[TSchema], type: cg.MockObjClass, create: Callable[[str, Dict[str, Any]], Awaitable[cg.Pvariable]], config: Dict[str, Any]) -> None:
+Create = Callable[[Dict[str, Any], str, cg.MockObj], Awaitable[cg.Pvariable]]
+
+def create_only_conf(create: Callable[[Dict[str, Any]], Awaitable[cg.Pvariable]]) -> Create:
+    return lambda conf, _key, _hub: create(conf)
+
+async def component_to_code(component_type: str, schema_: schema.Schema[TSchema], type: cg.MockObjClass, create: Create, config: Dict[str, Any]) -> None:
     cg.add_define(f"OPENTHERM_USE_{component_type.upper()}")
 
-    hub = await cg.get_variable(config[CONF_OPENTHERM_ID])
+    hub = await cg.get_variable(config[const.CONF_OPENTHERM_ID])
 
     keys: List[str] = []
     for key, conf in config.items():
@@ -73,7 +81,7 @@ async def component_to_code(component_type: str, schema_: schema.Schema[TSchema]
             continue
         id = conf[CONF_ID]
         if id and id.type == type:
-            entity = await create(key, conf)
+            entity = await create(conf, key, hub)
             cg.add(getattr(hub, f"set_{key}_{component_type.lower()}")(entity))
             keys.append(key)
 

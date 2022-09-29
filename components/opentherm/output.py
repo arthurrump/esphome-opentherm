@@ -5,12 +5,12 @@ import esphome.config_validation as cv
 from esphome.components import output
 from esphome.const import CONF_ID
 
-from . import schema, validate, input, generate, CONF_OPENTHERM_ID, OpenthermHub, opentherm_ns
+from . import const, schema, validate, input, generate
 
-DEPENDENCIES = [ "opentherm" ]
-COMPONENT_TYPE = "output"
+DEPENDENCIES = [ const.OPENTHERM ]
+COMPONENT_TYPE = const.OUTPUT
 
-OpenthermOutput = opentherm_ns.class_("OpenthermOutput", output.FloatOutput, cg.Component, input.OpenthermInput)
+OpenthermOutput = generate.opentherm_ns.class_("OpenthermOutput", output.FloatOutput, cg.Component, input.OpenthermInput)
 
 async def new_openthermoutput(config: Dict[str, Any]) -> cg.Pvariable:
     var = cg.new_Pvariable(config[CONF_ID])
@@ -26,16 +26,13 @@ def get_entity_validation_schema(entity: schema.InputSchema) -> cv.Schema:
         .extend(input.input_schema(entity)) \
         .extend(cv.COMPONENT_SCHEMA)
 
-CONFIG_SCHEMA = \
-    cv.Schema({ cv.GenerateID(CONF_OPENTHERM_ID): cv.use_id(OpenthermHub) }) \
-        .extend(validate.create_validation_schema(schema.INPUTS, get_entity_validation_schema)) \
-        .extend(cv.COMPONENT_SCHEMA)
+CONFIG_SCHEMA = validate.create_component_schema(schema.INPUTS, get_entity_validation_schema)
 
 async def to_code(config: Dict[str, Any]) -> None:
     await generate.component_to_code(
         COMPONENT_TYPE, 
         schema.INPUTS,
         OpenthermOutput, 
-        lambda _, conf: new_openthermoutput(conf), 
+        generate.create_only_conf(new_openthermoutput), 
         config
     )
