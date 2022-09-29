@@ -32,14 +32,6 @@ CONFIG_SCHEMA = cv.All(
     cv.only_with_arduino,
 )
 
-def cg_write_component_defines(component, keys):
-    cg.add_define(
-        f"OPENTHERM_{component}_LIST(F, sep)", 
-        cg.RawExpression(" sep ".join(map(lambda key: f"F({key})", keys)))
-    )
-    for key in keys:
-        cg.add_define(f"OPENTHERM_HAS_{component}_{key}")
-
 def cg_write_required_messages(hub, messages):
     for (repeat, message) in messages:
         add = "add_repeating_request" if repeat else "add_initial_request"

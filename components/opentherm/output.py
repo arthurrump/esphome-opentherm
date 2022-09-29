@@ -1,20 +1,23 @@
+from typing import Any, Dict
+
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import output
 from esphome.const import CONF_ID
 
-from . import schema, validate, input
-from . import cg_write_read_input_defines
-from . import CONF_OPENTHERM_ID, OpenthermHub, opentherm_ns, cg_write_component_defines, cg_write_required_messages
+from . import schema, validate, input, generate, CONF_OPENTHERM_ID, OpenthermHub, opentherm_ns
 
 DEPENDENCIES = [ "opentherm" ]
+COMPONENT_TYPE = "output"
 
 OpenthermOutput = opentherm_ns.class_("OpenthermOutput", output.FloatOutput, cg.Component, input.OpenthermInput)
 
-async def new_setpointoutput(config, *args):
-    var = cg.new_Pvariable(config[CONF_ID], *args)
+async def new_openthermoutput(config: Dict[str, Any]) -> cg.Pvariable:
+    var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await output.register_output(var, config)
+    cg.add(getattr(var, "set_id")(cg.RawExpression(f'"{id}"')))
+    # TODO set other input properties
     return var
 
 def get_entity_validation_schema(entity: schema.InputSchema) -> cv.Schema:
@@ -28,24 +31,10 @@ CONFIG_SCHEMA = \
         .extend(validate.create_validation_schema(schema.INPUTS, get_entity_validation_schema)) \
         .extend(cv.COMPONENT_SCHEMA)
 
-async def to_code(config):
-    cg.add_define("OPENTHERM_USE_OUTPUT")
-
-    hub = await cg.get_variable(config[CONF_OPENTHERM_ID])
-
-    keys = []
-    for key, conf in config.items():
-        if not isinstance(conf, dict):
-            continue
-        id = conf[CONF_ID]
-        if id and id.type == OpenthermOutput:
-            so = await new_setpointoutput(conf)
-            cg.add(getattr(so, "set_id")(cg.RawExpression(f'"{id}"')))
-            # if CONF_auto_max_value in conf:
-            #     cg.add(getattr(so, "set_auto_max_power")(conf[CONF_auto_max_value]))
-            cg.add(getattr(hub, f"set_{key}_output")(so))
-            keys.append(key)
-
-    # cg_write_required_messages(hub, input_required_messages(keys))    
-    cg_write_component_defines("OUTPUT", keys)
-    cg_write_read_input_defines(keys, "output")
+async def to_code(config: Dict[str, Any]) -> None:
+    await generate.generic_to_code(
+        COMPONENT_TYPE, 
+        OpenthermOutput, 
+        lambda _, conf: new_openthermoutput(conf), 
+        config
+    )
