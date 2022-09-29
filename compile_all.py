@@ -1,4 +1,5 @@
 import os
+import sys
 
 status = 0
 
@@ -9,4 +10,5 @@ for file in os.listdir():
         print(f"------- Finished compiling {file} with status {res} -------")
         status += res
 
-exit(status)
+if status != 0:
+    sys.exit(1)
