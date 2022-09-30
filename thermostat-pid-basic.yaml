@@ -76,5 +76,5 @@ climate:
     default_target_temperature: 20
     sensor: ch_room_temperature
     control_parameters: 
-      kp: 30
-      ki: 0.02
+      kp: 0.4
+      ki: 0.004
