@@ -191,9 +191,8 @@ void OpenthermHub::loop() {
         this->ot->sendRequestAync(request);
         ESP_LOGD(TAG, "Sent OpenTherm request: %s", String(request, HEX).c_str());
         this->current_message_iterator++;
-        
-        this->ot->process();
     }
+    this->ot->process();
 }
 
 #define ID(x) x
