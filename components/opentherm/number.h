@@ -1,5 +1,4 @@
 #pragma once
-#ifdef OPENTHERM_USE_NUMBER
 
 #include "esphome/components/number/number.h"
 #include "input.h"
@@ -21,5 +20,3 @@ public:
 
 } // namespace opentherm
 } // namespace esphome
-
-#endif //OPENTHERM_USE_NUMBER

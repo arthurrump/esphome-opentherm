@@ -8,6 +8,7 @@ from esphome.const import CONF_ID
 
 from . import const, schema, validate, generate
 
+AUTO_LOAD = [ "binary_sensor", "sensor", "switch", "number", "output" ]
 MULTI_CONF = True
 
 CONFIG_SCHEMA = cv.All(

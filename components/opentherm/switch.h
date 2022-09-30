@@ -1,5 +1,4 @@
 #pragma once
-#ifdef OPENTHERM_USE_SWITCH
 
 #include "esphome/core/component.h"
 #include "esphome/components/switch/switch.h"
@@ -30,5 +29,3 @@ public:
 
 } // namespace opentherm
 } // namespace esphome
-
-#endif //OPENTHERM_USE_SWITCH

@@ -1,4 +1,3 @@
-#ifdef OPENTHERM_USE_SWITCH
 #include "switch.h"
 
 namespace esphome {
@@ -38,5 +37,3 @@ void OpenthermSwitch::setup() {
 
 } // namespace opentherm
 } // namespace esphome
-
-#endif //OPENTHERM_USE_SWITCH

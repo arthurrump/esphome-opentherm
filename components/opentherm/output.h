@@ -1,5 +1,4 @@
 #pragma once
-#ifdef OPENTHERM_USE_OUTPUT
 
 #include "esphome/components/output/float_output.h"
 #include "input.h"
@@ -33,5 +32,3 @@ public:
 
 } // namespace opentherm
 } // namespace esphome
-
-#endif //OPENTHERM_USE_OUTPUT

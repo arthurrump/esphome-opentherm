@@ -5,25 +5,12 @@
 
 #include "OpenTherm.h"
 
-#if defined(OPENTHERM_USE_INPUT_SENSOR) || defined(OPENTHERM_USE_SENSOR)
 #include "esphome/components/sensor/sensor.h"
-#endif //OPENTHERM_USE_INUPT_SENSOR || OPENTHERM_USE_SENSOR
-
-#ifdef OPENTHERM_USE_BINARY_SENSOR
 #include "esphome/components/binary_sensor/binary_sensor.h"
-#endif //OPENTHERM_USE_BINARY_SENSOR
 
-#ifdef OPENTHERM_USE_SWITCH
 #include "switch.h"
-#endif //OPENTHERM_USE_SWITCH
-
-#ifdef OPENTHERM_USE_NUMBER
 #include "number.h"
-#endif //OPENTHERM_USE_NUMBER
-
-#ifdef OPENTHERM_USE_OUTPUT
 #include "output.h"
-#endif //OPENTHERM_USE_OUTPUT
 
 #include <unordered_map>
 #include <unordered_set>
@@ -63,8 +50,8 @@
 #ifndef OPENTHERM_OUTPUT_MESSAGE_HANDLERS
 #define OPENTHERM_OUTPUT_MESSAGE_HANDLERS(MESSAGE, ENTITY, entity_sep, postscript, msg_sep)
 #endif
-#ifndef OPENTHERM_INPUT_MESSAGE_HANDLERS
-#define OPENTHERM_INPUT_MESSAGE_HANDLERS(MESSAGE, ENTITY, entity_sep, postscript, msg_sep)
+#ifndef OPENTHERM_INPUT_SENSOR_MESSAGE_HANDLERS
+#define OPENTHERM_INPUT_SENSOR_MESSAGE_HANDLERS(MESSAGE, ENTITY, entity_sep, postscript, msg_sep)
 #endif
 
 namespace esphome {
