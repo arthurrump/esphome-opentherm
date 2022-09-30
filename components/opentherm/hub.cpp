@@ -130,6 +130,7 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
             String(response, HEX).c_str(),
             String(ot->getLastResponseStatus()).c_str()
         );
+        // TODO: Remove invalid requests from the queue
         return;
     }
 
@@ -159,6 +160,7 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
     // TODO: Handle internal updates
     // - Automatic min/max
     // - Is feature (eg. cooling, ch2, setting the max setpoint) supported
+    // - Set status based on heating request through output things
 }
 
 void OpenthermHub::setup() {

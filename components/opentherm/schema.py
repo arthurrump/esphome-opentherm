@@ -340,6 +340,7 @@ BINARY_SENSORS: Schema = Schema({
     "flame_on": BinarySensorSchema({
         "description": "Status: Flame on",
         "device_class": DEVICE_CLASS_HEAT,
+        "icon": "mdi:fire",
         "message": "Status",
         "keep_updated": True,
         "message_data": "flag8_lb_3",
