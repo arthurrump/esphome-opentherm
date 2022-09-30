@@ -1,3 +1,6 @@
+from typing import Any, Dict
+
+import esphome.codegen as cg
 import esphome.config_validation as cv
 
 from . import schema, generate
@@ -25,3 +28,13 @@ def input_schema(entity: schema.InputSchema) -> cv.Schema:
         schema = schema.extend({ cv.Optional(CONF_auto_max_value, False): cv.boolean })
     schema = schema.add_extra(validate_min_value_less_than_max_value)
     return schema
+
+def generate_setters(entity: cg.MockObj, conf: Dict[str, Any]) -> None:
+    if CONF_min_value in conf:
+        cg.add(entity.set_min_value(conf[CONF_min_value]))
+    if CONF_max_value in conf:
+        cg.add(entity.set_max_value(conf[CONF_max_value]))
+    if CONF_auto_min_value in conf:
+        cg.add(entity.set_auto_min_value(conf[CONF_auto_min_value]))
+    if CONF_auto_max_value in conf:
+        cg.add(entity.set_auto_max_value(conf[CONF_auto_max_value]))

@@ -17,7 +17,7 @@ async def new_openthermoutput(config: Dict[str, Any], key: str, _hub: cg.MockObj
     await cg.register_component(var, config)
     await output.register_output(var, config)
     cg.add(getattr(var, "set_id")(cg.RawExpression(f'"{key}_{config[CONF_ID]}"')))
-    # TODO set other input properties
+    input.generate_setters(var, config)
     return var
 
 def get_entity_validation_schema(entity: schema.InputSchema) -> cv.Schema:

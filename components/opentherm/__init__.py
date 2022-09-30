@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 import esphome.codegen as cg
-import esphome.cpp_generator as cpp
 import esphome.config_validation as cv
 from esphome.components import sensor
 from esphome.const import CONF_ID
@@ -30,10 +29,10 @@ async def to_code(config: Dict[str, Any]) -> None:
     id = str(config[CONF_ID])
     # Create the hub, passing the two callbacks defined below
     # Since the hub is used in the callbacks, we need to define it first
-    var = cg.new_Pvariable(config[CONF_ID], cpp.RawExpression(id + "_handle_interrupt"), cpp.RawExpression(id + "_process_response"))
+    var = cg.new_Pvariable(config[CONF_ID], cg.RawExpression(id + "_handle_interrupt"), cg.RawExpression(id + "_process_response"))
     # Define two global callbacks to process responses on interrupt
-    cg.add_global(cpp.RawStatement("void IRAM_ATTR " + id + "_handle_interrupt() { " + id + "->handle_interrupt(); }"))
-    cg.add_global(cpp.RawStatement("void " + id + "_process_response(unsigned long response, OpenThermResponseStatus status) { " + id + "->process_response(response, status); }"))
+    cg.add_global(cg.RawStatement("void IRAM_ATTR " + id + "_handle_interrupt() { " + id + "->handle_interrupt(); }"))
+    cg.add_global(cg.RawStatement("void " + id + "_process_response(unsigned long response, OpenThermResponseStatus status) { " + id + "->process_response(response, status); }"))
     await cg.register_component(var, config)
 
     input_sensors = []

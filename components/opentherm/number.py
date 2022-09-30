@@ -16,7 +16,7 @@ async def new_openthermnumber(config: Dict[str, Any]) -> cg.Pvariable:
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await number.register_number(var, config, min_value = config[input.CONF_min_value], max_value = config[input.CONF_max_value])
-    # TODO Set other properties, like unit_of_measurement and mode, input props
+    input.generate_setters(var, config)
     return var
 
 def get_entity_validation_schema(entity: schema.InputSchema) -> cv.Schema:
