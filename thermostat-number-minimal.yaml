@@ -1,0 +1,28 @@
+esphome:
+  name: thermostat-number-minimal
+
+external_components:
+  source: 
+    type: local
+    path: components
+  components: [ opentherm ]
+
+esp8266:
+  board: d1_mini
+
+logger:
+
+api:
+ota:
+wifi:
+  ap:
+    ssid: "Thermostat"
+    password: "MySecretThemostat"
+captive_portal:
+
+opentherm:
+
+number:
+  - platform: opentherm
+    t_set:
+      name: "Boiler Control setpoint"

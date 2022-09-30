@@ -2,7 +2,7 @@
     "files.associations": {
         "*.yaml": "esphome"
     },
-    "[yaml]": {
+    "[esphome]": {
         "editor.tabSize": 2,
     }
 }

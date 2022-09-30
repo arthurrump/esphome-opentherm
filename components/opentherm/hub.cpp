@@ -122,7 +122,6 @@ void IRAM_ATTR OpenthermHub::handle_interrupt() {
 }
 
 void OpenthermHub::process_response(unsigned long response, OpenThermResponseStatus status) {
-
     // First check if the response is valid and short-circuit execution if it isn't.
     if (!ot->isValidResponse(response)) {
         ESP_LOGW(
@@ -156,6 +155,10 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
     switch (id) {
         OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
     }
+
+    // TODO: Handle internal updates
+    // - Automatic min/max
+    // - Is feature (eg. cooling, ch2, setting the max setpoint) supported
 }
 
 void OpenthermHub::setup() {

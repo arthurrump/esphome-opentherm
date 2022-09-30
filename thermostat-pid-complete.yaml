@@ -20,11 +20,6 @@ wifi:
     password: "MySecretThemostat"
 captive_portal:
 
-status_led:
-  pin:
-    number: 2
-    inverted: true
-
 opentherm:
   in_pin: 4
   out_pin: 5
@@ -34,10 +29,7 @@ opentherm:
   otc_active: false
   ch2_active: true
 
-  # Optional sensor input to set the boiler central heating water temperature
-  # This example uses output components instead
-  # t_set:
-  # t_set_ch2:
+  t_room: ch_room_temperature
 
 output:
   - platform: opentherm
@@ -52,14 +44,18 @@ output:
       max_value: 40
       zero_means_zero: true
 
-# Numbers to set the boiler central heating water temperature
-# This example uses output components instead
-# number:
-#   - platform: opentherm
-#     t_set:
-#       name: "Boiler Control Setpoint"
-#     t_set_ch2:
-#       name: "Boiler Control Setpoint 2"
+number:
+  - platform: opentherm
+    cooling_control:
+      name: "Boiler Cooling control signal"
+    t_dhw_set:
+      name: "Boiler DHW Setpoint"
+    max_t_set:
+      name: "Boiler Max Setpoint"
+    t_room_set:
+      name: "Boiler Room Setpoint"
+    t_room_set_ch2:
+      name: "Boiler Room Setpoint CH2"
 
 sensor:
   - platform: opentherm

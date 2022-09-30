@@ -1,0 +1,80 @@
+esphome:
+  name: thermostat-pid-complete
+
+external_components:
+  source: 
+    type: local
+    path: components
+  components: [ opentherm ]
+
+esp8266:
+  board: d1_mini
+
+logger:
+
+api:
+ota:
+wifi:
+  ap:
+    ssid: "Thermostat"
+    password: "MySecretThemostat"
+captive_portal:
+
+opentherm:
+  ch_enable: true
+  dhw_enable: true
+
+output:
+  - platform: opentherm
+    t_set:
+      id: t_set
+      min_value: 20
+      max_value: 40
+
+sensor:
+  - platform: opentherm
+    rel_mod_level:
+      name: "Boiler Relative modulation level"
+    t_boiler:
+      name: "Boiler water temperature"
+    t_ret:
+      name: "Boiler Return water temperature"  
+    dhw_flow_rate:
+      name: "Boiler Water flow rate in DHW circuit"
+    t_dhw:
+      name: "Boiler DHW temperature"
+
+  - platform: homeassistant
+    id: ch_room_temperature
+    entity_id: sensor.temperature
+
+binary_sensor:
+  - platform: opentherm
+    ch_active:
+      name: "Boiler Central Heating active"
+    dhw_active:
+      name: "Boiler Domestic Hot Water active"
+    flame_on:
+      name: "Boiler Flame on"
+    fault_indication:
+      name: "Boiler Fault indication"
+      entity_category: diagnostic
+    diagnostic_indication:
+      name: "Boiler Diagnostic event"
+      entity_category: diagnostic
+
+switch:
+  - platform: opentherm
+    ch_enable:
+      name: "Boiler Central Heating enabled"
+      mode: restore_default_on
+
+climate:
+  - platform: pid
+    name: "Central heating"
+    heat_output: t_set
+    default_target_temperature: 20
+    sensor: ch_room_temperature
+    control_parameters: 
+      kp: 30
+      ki: 0.02
