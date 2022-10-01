@@ -11,6 +11,11 @@ Alternatives:
 - [esphome-opentherm by @wichers](https://github.com/wichers/esphome-opentherm), which works as a gateway, rather than a master, allowing you to combine the system with your own thermostat
 - And more options if you [search on GitHub](https://github.com/search?q=esphome+opentherm)
 
+## Quick glossary
+
+- CH: Central Heating
+- DHW: Domestic Hot Water
+
 ## Usage
 
 The OpenTherm Master component is available as an external component in ESPHome and can be included in your configuration as follows:
@@ -139,6 +144,8 @@ For enabling of central heating and cooling, the enable-flag is only sent to the
 - the setpoint or cooling control value is not 0, if it is configured.
 
 For domestic hot water and outside temperature compensation, only the first two conditions are necessary.
+
+The last point ensures that central heating is not enabled if no heating is requested as indicated by a setpoint of 0. If you use a number as the setpoint input and use a minimum value higher than 0, you NEED to use the ch_enable switch to turn off your central heating. In that case the flag will be set to true in the hub configuration, and setpoint is always larger than 0, so including a switch is the only way you can turn off central heating. (This also holds for cooling and CH2.)
 
 The following switches are available:
 

@@ -15,13 +15,11 @@ enum OpenthermSwitchMode {
 
 class OpenthermSwitch : public switch_::Switch, public Component {
 protected:
-    bool* value_ref;
     OpenthermSwitchMode mode;
 
     void write_state(bool state) override;
 
 public:
-    OpenthermSwitch(bool* value_ref) : value_ref(value_ref) {}
     void set_mode(OpenthermSwitchMode mode) { this->mode = mode; }
 
     void setup() override;

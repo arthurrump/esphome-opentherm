@@ -59,7 +59,7 @@ def define_message_handler(component_type: str, keys: List[str], schema_: schema
 
 def define_readers(component_type: str, keys: List[str]) -> None:
     for key in keys:
-        cg.add_define(f"OPENTHERM_READ_{key}", f"this->{key}_{component_type.lower()}->state")
+        cg.add_define(f"OPENTHERM_READ_{key}", cg.RawExpression(f"this->{key}_{component_type.lower()}->state"))
 
 def add_messages(hub: cg.MockObj, keys: List[str], schema_: schema.Schema[TSchema]):
     messages: Set[Tuple[str, bool]] = set()

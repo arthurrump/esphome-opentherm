@@ -4,15 +4,7 @@ namespace esphome {
 namespace opentherm {
 
 void OpenthermSwitch::write_state(bool state) {
-    switch (this->mode) {
-        case OPENTHERM_SWITCH_RESTORE_DEFAULT_ON:
-        case OPENTHERM_SWITCH_RESTORE_DEFAULT_OFF:
-        case OPENTHERM_SWITCH_START_ON:
-        case OPENTHERM_SWITCH_START_OFF:
-            *this->value_ref = state;
-            this->publish_state(state);
-            break;
-    }
+    this->publish_state(state);
 }
 
 void OpenthermSwitch::setup() {

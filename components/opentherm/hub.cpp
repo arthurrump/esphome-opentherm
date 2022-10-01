@@ -73,7 +73,70 @@ unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
     // never be executed, because we short-circuit it here. 
     if (request_id == OpenThermMessageID::Status) {
         ESP_LOGD(TAG, "Building Status request");
-        return ot->buildSetBoilerStatusRequest(this->ch_enable, this->dhw_enable, this->cooling_enable, this->otc_active, this->ch2_active);
+        bool ch_enable = 
+            this->ch_enable
+            && 
+            #ifdef OPENTHERM_READ_ch_enable
+                OPENTHERM_READ_ch_enable
+            #else
+                true
+            #endif 
+            && 
+            #ifdef OPENTHERM_READ_t_set
+                OPENTHERM_READ_t_set > 0.0
+            #else
+                true
+            #endif
+            ;
+        bool dhw_enable = 
+            this->dhw_enable
+            && 
+            #ifdef OPENTHERM_READ_dhw_enable
+                OPENTHERM_READ_dhw_enable
+            #else
+                true
+            #endif
+            ;
+        bool cooling_enable = 
+            this->cooling_enable
+            && 
+            #ifdef OPENTHERM_READ_cooling_enable
+                OPENTHERM_READ_cooling_enable
+            #else
+                true
+            #endif 
+            && 
+            #ifdef OPENTHERM_READ_cooling_control
+                OPENTHERM_READ_cooling_control > 0.0
+            #else
+                true
+            #endif
+            ;
+        bool otc_active = 
+            this->otc_active
+            && 
+            #ifdef OPENTHERM_READ_otc_active
+                OPENTHERM_READ_otc_active
+            #else
+                true
+            #endif
+            ;
+        bool ch2_active = 
+            this->ch2_active
+            && 
+            #ifdef OPENTHERM_READ_ch2_active
+                OPENTHERM_READ_ch2_active
+            #else
+                true
+            #endif 
+            && 
+            #ifdef OPENTHERM_READ_t_set_ch2
+                OPENTHERM_READ_t_set_ch2 > 0.0
+            #else
+                true
+            #endif
+            ;
+        return ot->buildSetBoilerStatusRequest(ch_enable, dhw_enable, cooling_enable, otc_active, ch2_active);
     }
 
     // Next, we start with the write requests from switches and other inputs,
@@ -130,7 +193,6 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
             String(response, HEX).c_str(),
             String(ot->getLastResponseStatus()).c_str()
         );
-        // TODO: Remove invalid requests from the queue
         return;
     }
 
@@ -156,11 +218,6 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
     switch (id) {
         OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
     }
-
-    // TODO: Handle internal updates
-    // - Automatic min/max
-    // - Is feature (eg. cooling, ch2, setting the max setpoint) supported
-    // - Set status based on heating request through output things
 }
 
 void OpenthermHub::setup() {
