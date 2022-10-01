@@ -29,7 +29,8 @@ output:
     t_set:
       id: t_set
       min_value: 20
-      max_value: 40
+      max_value: 65
+      zero_means_zero: true
 
 sensor:
   - platform: opentherm
@@ -39,10 +40,6 @@ sensor:
       name: "Boiler water temperature"
     t_ret:
       name: "Boiler Return water temperature"  
-    dhw_flow_rate:
-      name: "Boiler Water flow rate in DHW circuit"
-    t_dhw:
-      name: "Boiler DHW temperature"
 
   - platform: homeassistant
     id: ch_room_temperature
