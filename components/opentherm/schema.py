@@ -248,7 +248,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "message_data": "u16",
     }),
     "t_dhw_set_ub": SensorSchema({
-        "description": "Upper bound for adjustement of DHW setpoint",
+        "description": "Upper bound for adjustment of DHW setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
         "device_class": DEVICE_CLASS_TEMPERATURE,
@@ -258,7 +258,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "message_data": "s8_hb",
     }),
     "t_dhw_set_lb": SensorSchema({
-        "description": "Lower bound for adjustement of DHW setpoint",
+        "description": "Lower bound for adjustment of DHW setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
         "device_class": DEVICE_CLASS_TEMPERATURE,
@@ -268,7 +268,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "message_data": "s8_lb",
     }),
     "max_t_set_ub": SensorSchema({
-        "description": "Upper bound for adjustement of max CH setpoint",
+        "description": "Upper bound for adjustment of max CH setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
         "device_class": DEVICE_CLASS_TEMPERATURE,
@@ -278,7 +278,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "message_data": "s8_hb",
     }),
     "max_t_set_lb": SensorSchema({
-        "description": "Lower bound for adjustement of max CH setpoint",
+        "description": "Lower bound for adjustment of max CH setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
         "accuracy_decimals": 0,
         "device_class": DEVICE_CLASS_TEMPERATURE,
