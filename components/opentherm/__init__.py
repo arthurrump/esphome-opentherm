@@ -48,6 +48,7 @@ async def to_code(config: Dict[str, Any]) -> None:
     if len(input_sensors) > 0:
         generate.define_has_component(const.INPUT_SENSOR, input_sensors)
         generate.define_message_handler(const.INPUT_SENSOR, input_sensors, schema.INPUTS)
+        generate.define_readers(const.INPUT_SENSOR, input_sensors)
         generate.add_messages(var, input_sensors, schema.INPUTS)
 
     cg.add_library("ihormelnyk/OpenTherm Library", "1.1.3")

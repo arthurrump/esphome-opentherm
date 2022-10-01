@@ -30,11 +30,7 @@ def input_schema(entity: schema.InputSchema) -> cv.Schema:
     return schema
 
 def generate_setters(entity: cg.MockObj, conf: Dict[str, Any]) -> None:
-    if CONF_min_value in conf:
-        cg.add(entity.set_min_value(conf[CONF_min_value]))
-    if CONF_max_value in conf:
-        cg.add(entity.set_max_value(conf[CONF_max_value]))
-    if CONF_auto_min_value in conf:
-        cg.add(entity.set_auto_min_value(conf[CONF_auto_min_value]))
-    if CONF_auto_max_value in conf:
-        cg.add(entity.set_auto_max_value(conf[CONF_auto_max_value]))
+    generate.add_property_set(entity, CONF_min_value, conf)
+    generate.add_property_set(entity, CONF_max_value, conf)
+    generate.add_property_set(entity, CONF_auto_min_value, conf)
+    generate.add_property_set(entity, CONF_auto_max_value, conf)

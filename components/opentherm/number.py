@@ -31,10 +31,11 @@ def get_entity_validation_schema(entity: schema.InputSchema) -> cv.Schema:
 CONFIG_SCHEMA = validate.create_component_schema(schema.INPUTS, get_entity_validation_schema)
 
 async def to_code(config: Dict[str, Any]) -> None:
-    await generate.component_to_code(
+    keys = await generate.component_to_code(
         COMPONENT_TYPE,
         schema.INPUTS,
         OpenthermNumber, 
         generate.create_only_conf(new_openthermnumber), 
         config
     )
+    generate.define_readers(COMPONENT_TYPE, keys)

@@ -57,6 +57,10 @@ def define_message_handler(component_type: str, keys: List[str], schema_: schema
         )
     )
 
+def define_readers(component_type: str, keys: List[str]) -> None:
+    for key in keys:
+        cg.add_define(f"OPENTHERM_READ_{key}", f"this->{key}_{component_type.lower()}->state")
+
 def add_messages(hub: cg.MockObj, keys: List[str], schema_: schema.Schema[TSchema]):
     messages: Set[Tuple[str, bool]] = set()
     for key in keys:
@@ -68,12 +72,28 @@ def add_messages(hub: cg.MockObj, keys: List[str], schema_: schema.Schema[TSchem
         else:
             cg.add(hub.add_initial_message(msg_expr))
 
+def add_property_set(var: cg.MockObj, config_key: str, config: Dict[str, Any]) -> None:
+    if config_key in config:
+        cg.add(getattr(var, f"set_{config_key}")(config[config_key]))
+
 Create = Callable[[Dict[str, Any], str, cg.MockObj], Awaitable[cg.Pvariable]]
 
 def create_only_conf(create: Callable[[Dict[str, Any]], Awaitable[cg.Pvariable]]) -> Create:
     return lambda conf, _key, _hub: create(conf)
 
-async def component_to_code(component_type: str, schema_: schema.Schema[TSchema], type: cg.MockObjClass, create: Create, config: Dict[str, Any]) -> None:
+async def component_to_code(component_type: str, schema_: schema.Schema[TSchema], type: cg.MockObjClass, create: Create, config: Dict[str, Any]) -> List[str]:
+    """Generate the code for each configured component in the schema of a component type.
+    
+    Parameters:
+    - component_type: The type of component, e.g. "sensor" or "binary_sensor"
+    - schema_: The schema for that component type, a list of available components
+    - type: The type of the component, e.g. sensor.Sensor or OpenthermOutput
+    - create: A constructor function for the component, which receives the config, 
+      the key and the hub and should asynchronously return the new component
+    - config: The configuration for this component type
+
+    Returns: The list of keys for the created components
+    """
     cg.add_define(f"OPENTHERM_USE_{component_type.upper()}")
 
     hub = await cg.get_variable(config[const.CONF_OPENTHERM_ID])
@@ -91,3 +111,5 @@ async def component_to_code(component_type: str, schema_: schema.Schema[TSchema]
     define_has_component(component_type, keys)
     define_message_handler(component_type, keys, schema_)
     add_messages(hub, keys, schema_)
+
+    return keys
