@@ -8,8 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo "::set-output name=changelog::$((python3 read_changelog.py ${{ github.ref_name }}))"
-        id: read_changelog
+      - run: python3 read_changelog.py ${{ github.ref_name }}))
       - uses: ncipollo/release-action@v1
         with:
-          body: ${{ steps.read_changelog.outputs.changelog }}
+          bodyFile: CHANGELOG.md.tmp
