@@ -1,7 +1,7 @@
-import os
-from typing import Iterator, List
+from typing import Iterator, List, Optional
 
 from datetime import date
+import os
 import re
 
 CHANGELOG_FILE = "CHANGELOG.md"
@@ -14,7 +14,7 @@ def read_changelog() -> List[str]:
     with open(CHANGELOG_FILE, "r", encoding = "utf-8") as f:
         return f.readlines()
 
-def get_current_version(changelog: List[str]) -> str | None:
+def get_current_version(changelog: List[str]) -> Optional[str]:
     for line in changelog:
         match = VERSION_HEADER_PATTERN.match(line)
         if match:
