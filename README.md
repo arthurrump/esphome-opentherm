@@ -25,7 +25,7 @@ external_components:
   source: github://arthurrump/esphome-opentherm@main
 ```
 
-This references the main branch, which is cool if you want to stay up to date, but may also break your configuration if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available versions.
+This references the main branch, which is cool if you want to stay up to date, but may also break your configuration if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available versions. Instead of a specific version, you could also choose to follow a major version by specifying `@v1` etc.
 
 Then you can define the OpenTherm hub in your configuration:
 
