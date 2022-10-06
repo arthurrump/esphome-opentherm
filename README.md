@@ -37,7 +37,7 @@ opentherm:
 
 ### Usage as a thermostat
 
-The most important function for a thermostat is to set the boiler temperature setpoint. This component has three ways to provide this input: using a sensor from which the setpoint can be read, using a [number](https://esphome.io/components/number/index.html), or defining an output to which other components can write. For most users, the last option is the most useful one, as it can be combined with the [PID Climate](https://esphome.io/components/climate/pid.html) component to create a thermostat that works as you would expect a thermostat to work. See [thermostat-pid-basic.yaml](thermostat-pid-basic.yaml) for an example.
+The most important function for a thermostat is to set the boiler temperature setpoint. This component has three ways to provide this input: using a sensor from which the setpoint can be read, using a [number](https://esphome.io/components/number/index.html), or defining an output to which other components can write. For most users, the last option is the most useful one, as it can be combined with the [PID Climate](https://esphome.io/components/climate/pid.html) component to create a thermostat that works as you would expect a thermostat to work. See [thermostat-pid-basic.yaml](examples/thermostat-pid-basic.yaml) for an example.
 
 ### Numerical input
 

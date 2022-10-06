@@ -4,6 +4,8 @@ import sys
 status = 0
 results = {}
 
+os.chdir("examples")
+
 for file in os.listdir():
     if os.path.isfile(file) and file.endswith(".yaml"):
         print(f"------- Compiling {file} -------")
