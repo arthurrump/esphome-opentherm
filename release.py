@@ -66,6 +66,13 @@ if __name__ == "__main__":
     os.system('git add CHANGELOG.md')
     os.system(f'git commit -m "Release v{next_version}"')
     os.system(f'git tag -a v{next_version} -m "v{next_version}"')
-    os.system(f'git tag v{major}.{minor} -f')
+    os.system(f'git branch -f v{major}.{minor}')
     if major != 0:
-        os.system(f'git tag v{major} -f')
+        os.system(f'git branch -f v{major}')
+
+    if input("Please verify the changes. Push to origin? (y/n) ").lower() in [ "y", "yes" ]:
+        os.system('git push origin')
+        os.system(f'git push origin v{next_version}')
+        os.system(f'git push origin v{major}.{minor}')
+        if major != 0:
+            os.system(f'git push origin v{major}')
