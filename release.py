@@ -1,4 +1,4 @@
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Tuple
 
 from datetime import date
 import os
@@ -31,7 +31,7 @@ def get_next_changelog(changelog: List[str]) -> Iterator[str]:
         if line.startswith(VERSION_NEXT_HEADER):
             in_vNext = True
 
-def parse_version(version: str) -> tuple[int, int, int]:
+def parse_version(version: str) -> Tuple[int, int, int]:
     match = VERSION_PATTERN.match(version)
     if match and len(match.groups()) == 3:
         return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
