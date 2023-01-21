@@ -218,3 +218,9 @@ The boiler can also report several numerical values, which are available through
 - `t_dhw_set`: Domestic hot water temperature setpoint (°C)
 - `max_t_set`: Maximum allowable CH water setpoint (°C)
 <!-- END schema_docs:sensor -->
+
+## Troubleshooting
+
+### `Component not found: opentherm.`
+
+If ESPHome reports that it is unable to find the component, this might be due to the use of an older version of Python. It should work on version 3.9 (which is what runs in CI) and higher, but older versions may not support all typing features used in this project. You can update to a newer Python version, or install the backported typing library with `pip install typing-extensions`. (Thanks to [@Arise for figuring this out](https://github.com/arthurrump/esphome-opentherm/issues/10)!)
