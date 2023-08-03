@@ -184,6 +184,11 @@ The component can report boiler status on several binary sensors. The *Status* s
 - `max_ch_setpoint_transfer_enabled`: Remote boiler parameters: CH maximum setpoint transfer enabled
 - `dhw_setpoint_rw`: Remote boiler parameters: DHW setpoint read/write
 - `max_ch_setpoint_rw`: Remote boiler parameters: CH maximum setpoint read/write
+- `service_request`: Sevice required flag
+- `lockout_request`: Remote reset disabled/enabled
+- `flame_fault`: Gas/flame fault
+- `air_pressure_fault`: Low water pressure fault
+- `water_over_temperature`: Water over-temperature
 <!-- END schema_docs:binary_sensor -->
 
 ### Sensor
@@ -217,6 +222,9 @@ The boiler can also report several numerical values, which are available through
 - `max_t_set_lb`: Lower bound for adjustment of max CH setpoint (°C)
 - `t_dhw_set`: Domestic hot water temperature setpoint (°C)
 - `max_t_set`: Maximum allowable CH water setpoint (°C)
+- `max_capacity`: Maximum boiler capacity (KW)
+- `slave_type`: Slave (boiler) product type
+- `slave_version`: Slave version
 <!-- END schema_docs:sensor -->
 
 ## Troubleshooting
