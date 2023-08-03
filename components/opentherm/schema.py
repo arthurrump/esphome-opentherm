@@ -7,6 +7,8 @@ from typing_extensions import NotRequired
 from esphome.const import (
     UNIT_CELSIUS,
     UNIT_PERCENT,
+    UNIT_KILOWATT,
+    UNIT_EMPTY,
     DEVICE_CLASS_COLD,
     DEVICE_CLASS_HEAT,
     DEVICE_CLASS_PRESSURE,
@@ -14,6 +16,7 @@ from esphome.const import (
     DEVICE_CLASS_TEMPERATURE,
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_NONE,
 )
 
 T = TypeVar("T")
@@ -306,6 +309,45 @@ SENSORS: Schema[SensorSchema] = Schema({
         "message": "MaxTSet",
         "keep_updated": True,
         "message_data": "f88",
+    }),
+    "max_capacity": SensorSchema({
+        "description": "Maximum boiler capacity (KW)",
+        "unit_of_measurement": UNIT_KILOWATT,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_MEASUREMENT,
+        "message": "MaxCapacityMinModLevel",
+        "keep_updated": False,
+        "message_data": "u8_hb",
+    }),
+    "min_mod_level": SensorSchema({
+        "description": "Minimum modulation level",
+        "unit_of_measurement": UNIT_PERCENT,
+        "accuracy_decimals": 0,
+        "icon": "mdi:percent",
+        "state_class": STATE_CLASS_MEASUREMENT,
+        "message": "MaxCapacityMinModLevel",
+        "keep_updated": False,
+        "message_data": "u8_lb",
+    }),
+    "slave_type": SensorSchema({
+        "description": "Slave product type",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "icon": "mdi:percent",
+        "state_class": STATE_CLASS_NONE,
+        "message": "SlaveVersion",
+        "keep_updated": False,
+        "message_data": "u8_hb",
+    }),
+    "slave_version": SensorSchema({
+        "description": "Slave product version",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "icon": "mdi:percent",
+        "state_class": STATE_CLASS_NONE,
+        "message": "SlaveVersion",
+        "keep_updated": False,
+        "message_data": "u8_lb",
     }),
 })
 
