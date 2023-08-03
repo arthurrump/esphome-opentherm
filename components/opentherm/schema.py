@@ -427,6 +427,46 @@ BINARY_SENSORS: Schema = Schema({
         "keep_updated": False,
         "message_data": "flag8_lb_1",
     }),
+    "service_request": BinarySensorSchema({
+        "description": "Service Request",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_0",
+    }),
+    "lockout_reset": BinarySensorSchema({
+        "description": "Lockout Reset",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_1",
+    }),
+    "low_water_pressure": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Low Water Pressure",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_2",
+    }),
+    "flame_fault": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Gas/Flame Fault",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_3",
+    }),
+    "air_pressure_fault": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Air Pressure Fault",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_4",
+    }),
+    "water_over_temperature": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Water Over Temperature",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_5",
+    }),
 })
 
 class SwitchSchema(EntitySchema):
