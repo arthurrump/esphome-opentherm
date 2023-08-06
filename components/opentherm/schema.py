@@ -736,7 +736,7 @@ INPUTS: Schema[InputSchema] = Schema({
         "unit_of_measurement": UNIT_PERCENT,
         "icon": "mdi:percent",
         "message": "MaxRelModLevelSetting",
-        "keep_updated": False,
+        "keep_updated": True,
         "message_data": "f88",
         "range": (0, 127),
         "auto_min_value": { "message": "MaxCapacityMinModLevel", "message_data": "u8_lb" },
