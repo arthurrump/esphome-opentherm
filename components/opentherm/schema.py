@@ -340,7 +340,7 @@ SENSORS: Schema[SensorSchema] = Schema({
     }),
     "oem_fault_code": SensorSchema({
         "description": "OEM fault code",
-        "unit_of_measurement": UNIT_EMPTY,
+        "unit_of_measurement": UNIT_NONE,
         "accuracy_decimals": 0,
         "state_class": STATE_CLASS_NONE,
         "message": "ASFflags",
@@ -349,7 +349,7 @@ SENSORS: Schema[SensorSchema] = Schema({
     }),
     "oem_diagnostic_code": SensorSchema({
         "description": "OEM diagnostic code",
-        "unit_of_measurement": UNIT_EMPTY,
+        "unit_of_measurement": UNIT_NONE,
         "accuracy_decimals": 0,
         "state_class": STATE_CLASS_NONE,
         "message": "OEMDiagnosticCode",
