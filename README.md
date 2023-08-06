@@ -237,6 +237,9 @@ The boiler can also report several numerical values, which are available through
 - `otc_ratio_lb`: OTC heat curve ratio lower bound
 - `t_dhw_set`: Domestic hot water temperature setpoint (°C)
 - `max_t_set`: Maximum allowable CH water setpoint (°C)
+- `t_heat_exchanger`: Boiler heat exchanger temperature (°C)
+- `boiler_fan_speed`: Boiler fan speed (rpm * 60)
+- `boiler_flame_current`: Electrical current through burner flame (uA)
 - `max_capacity`: Maximum boiler capacity (KW)
 - `min_mod_level`: Minimum modulation level (%)
 - `oem_fault_code`: OEM fault code
