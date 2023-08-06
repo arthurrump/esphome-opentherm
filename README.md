@@ -4,7 +4,7 @@ An external ESPHome component to control a boiler (or other supported HVAC appli
 
 We aim for maximum flexibility in this component by exposing most of the information available through the OpenTherm protocol, while allowing all configuration in YAML. (No custom component code required!) Since every boiler and every situation is different, you have to play around a bit with the sensors you'd want to read. There is no requirement for a boiler to support everything in the protocol, so not every sensor in this component will work with your boiler. (For example, my Remeha Avanta does not report `ch_pressure`, `dhw_flow_rate` or `t_dhw`.) <!-- #2: We try to be smart about this and not send request messages for these if the boiler consistently indicates it doesn't understand the message or the data is unavailable. You'll find warning messages indicating this behaviour in the ESPHome logs. -->
 
-This component uses [@ihormelnyk's OpenTherm Library](https://github.com/ihormelnyk/opentherm_library) (MIT licensed) as its communication layer. The message loop is inspired by code for the [DIYLESS ESP32 Wi-Fi Thermostat](https://github.com/diyless/esp32-wifi-thermostat) (MIT licensed).
+This component uses [@FreeBear-nc's OpenTherm Library](https://github.com/freebear/opentherm_library) (MIT licensed) (a fork of [@ihormelnyk's OpenTherm Library](https://github.com/ihormelnyk/opentherm_library)) as its communication layer. The message loop is inspired by code for the [DIYLESS ESP32 Wi-Fi Thermostat](https://github.com/diyless/esp32-wifi-thermostat) (MIT licensed).
 
 Alternatives:
 - [ESPHome-OpenTherm by @rsciriano](https://github.com/rsciriano/ESPHome-OpenTherm), a custom component based on the same library as this project
@@ -22,7 +22,16 @@ The OpenTherm Master component is available as an external component in ESPHome 
 
 ```yaml
 external_components:
-  source: github://arthurrump/esphome-opentherm@main
+  source: github://freebear-nc/esphome-opentherm@main
+```
+
+A forked version of [@ihormelnyk's OpenTherm Library](https://github.com/ihormelnyk/opentherm_library) is also required:
+
+```yaml
+esphome:
+  platformio_options:
+    lib_deps:
+    - https://github.com/freebear-nc/opentherm_library.git
 ```
 
 This references the main branch, which is cool if you want to stay up to date, but may also break your configuration if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available versions. Instead of a specific version, you could also choose to follow a major version by specifying `@v1` etc.
