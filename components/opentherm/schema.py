@@ -743,6 +743,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "max_rel_mod_level": InputSchema({
         "description": "Maximum relative modulation level",
         "unit_of_measurement": UNIT_PERCENT,
+        "step": 0.1,
         "icon": "mdi:percent",
         "message": "MaxRelModLevelSetting",
         "keep_updated": True,
