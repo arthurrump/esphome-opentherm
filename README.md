@@ -133,9 +133,9 @@ The following inputs are available:
 - `t_room`: Current sensed room temperature (informational) (°C)  
   Default `min_value`: -40  
   Default `max_value`: 127
-- `max_rel_mod_level`: Maximum relative modulation level
-  Default `min_value`: 0
-  Default `max_value`: 127
+- `max_rel_mod_level`: Maximum relative modulation level (%)  
+  Default `min_value`: 0  
+  Default `max_value`: 127  
   Supports `auto_min_value`
 <!-- END schema_docs:input -->
 
@@ -197,11 +197,12 @@ The component can report boiler status on several binary sensors. The *Status* s
 - `max_ch_setpoint_transfer_enabled`: Remote boiler parameters: CH maximum setpoint transfer enabled
 - `dhw_setpoint_rw`: Remote boiler parameters: DHW setpoint read/write
 - `max_ch_setpoint_rw`: Remote boiler parameters: CH maximum setpoint read/write
-- `service_request`: Sevice required flag
-- `lockout_request`: Remote reset disabled/enabled
-- `flame_fault`: Gas/flame fault
-- `air_pressure_fault`: Low water pressure fault
-- `water_over_temperature`: Water over-temperature
+- `service_request`: Service Request
+- `lockout_reset`: Lockout Reset
+- `low_water_pressure`: Low Water Pressure
+- `flame_fault`: Gas/Flame Fault
+- `air_pressure_fault`: Air Pressure Fault
+- `water_over_temperature`: Water Over Temperature
 <!-- END schema_docs:binary_sensor -->
 
 ### Sensor
@@ -233,20 +234,22 @@ The boiler can also report several numerical values, which are available through
 - `t_dhw_set_lb`: Lower bound for adjustment of DHW setpoint (°C)
 - `max_t_set_ub`: Upper bound for adjustment of max CH setpoint (°C)
 - `max_t_set_lb`: Lower bound for adjustment of max CH setpoint (°C)
-- `otc_ratio_ub`: OTC heat curve ratio upper bound
-- `otc_ratio_lb`: OTC heat curve ratio lower bound
+- `otc_ratio_ub`: Upper bound of OTC curve ()
+- `otc_ratio_lb`: Lower bound of OTC curve ()
 - `t_dhw_set`: Domestic hot water temperature setpoint (°C)
 - `max_t_set`: Maximum allowable CH water setpoint (°C)
+- `otc_hc_ratio`: OTC heat curve ratio (°C)
+- `oem_fault_code`: OEM fault code ()
 - `t_heat_exchanger`: Boiler heat exchanger temperature (°C)
-- `boiler_fan_speed`: Boiler fan speed (rpm * 60)
-- `boiler_flame_current`: Electrical current through burner flame (uA)
-- `max_capacity`: Maximum boiler capacity (KW)
+- `boiler_fan_speed`: Boiler fan speed ()
+- `boiler_flame_current`: Boiler flame current (uA) ()
+- `oem_diagnostic_code`: OEM diagnostic code ()
+- `max_capacity`: Maximum boiler capacity (KW) (kW)
 - `min_mod_level`: Minimum modulation level (%)
-- `oem_fault_code`: OEM fault code
-- `oem_diagnostic_code`: OEM specific diagnostic/service code
-- `opentherm_version_slave`: The implemented version of the OpenTherm protocol used by the slave
-- `slave_type`: Slave product type
-- `slave_version`: Slave version (OpenTherm vendor ID)
+- `opentherm_version_slave`: Version of OpenTherm implemented by slave ()
+- `slave_type`: Slave product type ()
+- `slave_version`: Slave product version ()
+- `slave_id`: Slave ID code ()
 <!-- END schema_docs:sensor -->
 
 ## Troubleshooting
