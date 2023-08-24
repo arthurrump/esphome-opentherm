@@ -166,6 +166,8 @@ unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
         return ot->buildRequest(OpenThermMessageType::READ_DATA, request_id, 0);
     switch (request_id) {
         OPENTHERM_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_READ_MESSAGE, OPENTHERM_IGNORE_2, , , )
+    }
+    switch (request_id) {
         OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_READ_MESSAGE, OPENTHERM_IGNORE_2, , , )
     }
 
@@ -185,19 +187,20 @@ void IRAM_ATTR OpenthermHub::handle_interrupt() {
 }
 
 void OpenthermHub::process_response(unsigned long response, OpenThermResponseStatus status) {
+
+    // Read the second byte of the response, which is the message id.
+    byte id = (response >> 16 & 0xFF);
     // First check if the response is valid and short-circuit execution if it isn't.
     if (!ot->isValidResponse(response)) {
         ESP_LOGW(
             TAG, 
-            "Received invalid OpenTherm response: %s, status=%s", 
-            String(response, HEX).c_str(),
+            "Received invalid OpenTherm response (id: %u): %08x, status=%s", id, response,
+            //String(response, HEX).c_str(),
             String(ot->getLastResponseStatus()).c_str()
         );
         return;
     }
 
-    // Read the second byte of the response, which is the message id.
-    byte id = (response >> 16 & 0xFF);
     ESP_LOGD(TAG, "Received OpenTherm response with id %d: %s", id, String(response, HEX).c_str());
 
     // Define the handler helpers to publish the results to all sensors
