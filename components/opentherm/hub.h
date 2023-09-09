@@ -62,6 +62,8 @@ class OpenthermHub : public Component {
 protected:
     // Communication pins for the OpenTherm interface
     int in_pin, out_pin;
+    // Master id for MConfigMMemberIDcode command
+    int master_id = 0;
     // The OpenTherm interface from @ihormelnyk's library
     OpenTherm* ot;
 
@@ -114,6 +116,7 @@ public:
     // Setters for the input and output OpenTherm interface pins
     void set_in_pin(int in_pin) { this->in_pin = in_pin; }
     void set_out_pin(int out_pin) { this->out_pin = out_pin; }
+    void set_master_id(int master_id) { this->master_id = master_id; }
 
     #define OPENTHERM_SET_SENSOR(entity) void set_ ## entity(sensor::Sensor* sensor) { this->entity = sensor; }
     OPENTHERM_SENSOR_LIST(OPENTHERM_SET_SENSOR, )

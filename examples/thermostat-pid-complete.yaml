@@ -32,6 +32,7 @@ captive_portal:
 opentherm:
   in_pin: 4
   out_pin: 5
+  # master_id: 4 # default 0, baxi 4
   ch_enable: true
   dhw_enable: false
   cooling_enable: false
