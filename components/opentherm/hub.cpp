@@ -67,6 +67,10 @@ namespace message_data {
 #define OPENTHERM_IGNORE_2(x, y)
 
 unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
+    if (request_id == OpenThermMessageID::MConfigMMemberIDcode) {
+        ESP_LOGD(TAG, "Building Member Config request with id %d", this->master_id);
+        return ot->buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::MConfigMMemberIDcode, this->master_id);
+    }
     // First, handle the status request. This requires special logic, because we
     // wouldn't want to inadvertently disable domestic hot water, for example.
     // It is also included in the macro-generated code below, but that will
@@ -225,6 +229,7 @@ void OpenthermHub::setup() {
     this->ot = new OpenTherm(this->in_pin, this->out_pin, false);
     this->ot->begin(this->handle_interrupt_callback, this->process_response_callback);
 
+    this->add_initial_message(OpenThermMessageID::MConfigMMemberIDcode);
     // Ensure that there is at least one request, as we are required to
     // communicate at least once every second. Sending the status request is
     // good practice anyway.
