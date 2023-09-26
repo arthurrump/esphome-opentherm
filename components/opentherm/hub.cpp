@@ -254,11 +254,21 @@ void OpenthermHub::loop() {
         }
 
         unsigned int request = this->build_request(*this->current_message_iterator);
-        this->ot->sendRequestAync(request);
-        ESP_LOGD(TAG, "Sent OpenTherm request with id %d: %s", ot->getDataID(request), String(request, HEX).c_str());
+        if (this->sync_mode)
+        {
+            ESP_LOGD(TAG, "Sending SYNC OpenTherm request with id %d: %s", ot->getDataID(request), String(request, HEX).c_str());
+            this->ot->sendRequest(request);
+        }
+        else
+        {
+            this->ot->sendRequestAync(request);
+            ESP_LOGD(TAG, "Sent OpenTherm request with id %d: %s", ot->getDataID(request), String(request, HEX).c_str());
+        }
         this->current_message_iterator++;
     }
-    this->ot->process();
+
+    if (!this->sync_mode)
+      this->ot->process();
 }
 
 #define ID(x) x

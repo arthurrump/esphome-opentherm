@@ -21,6 +21,7 @@ CONFIG_SCHEMA = cv.All(
         cv.Optional("cooling_enable", False): cv.boolean,
         cv.Optional("otc_active", False): cv.boolean,
         cv.Optional("ch2_active", False): cv.boolean,
+        cv.Optional("sync_mode", False): cv.boolean,
     }).extend(validate.create_entities_schema(schema.INPUTS, (lambda _: cv.use_id(sensor.Sensor))))
       .extend(cv.COMPONENT_SCHEMA),
     cv.only_with_arduino,
