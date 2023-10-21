@@ -187,21 +187,20 @@ void IRAM_ATTR OpenthermHub::handle_interrupt() {
 }
 
 void OpenthermHub::process_response(unsigned long response, OpenThermResponseStatus status) {
+    OpenThermMessageID msgId = ot->getDataID(response);
 
-    // Read the second byte of the response, which is the message id.
-    byte id = (response >> 16 & 0xFF);
     // First check if the response is valid and short-circuit execution if it isn't.
     if (!ot->isValidResponse(response)) {
         ESP_LOGW(
             TAG, 
-            "Received invalid OpenTherm response (id: %u): %08x, status=%s", id, response,
-            //String(response, HEX).c_str(),
-            String(ot->getLastResponseStatus()).c_str()
+            "Received invalid OpenTherm response (id: %u): %08x, status=%s, type=%s", msgId, response,
+            ot->statusToString(ot->getLastResponseStatus()),
+            ot->messageTypeToString(ot->getMessageType(response))
         );
         return;
     }
 
-    ESP_LOGD(TAG, "Received OpenTherm response with id %d: %s", id, String(response, HEX).c_str());
+    ESP_LOGD(TAG, "Received OpenTherm response with id %d: %s", msgId, String(response, HEX).c_str());
 
     // Define the handler helpers to publish the results to all sensors
     #define OPENTHERM_MESSAGE_RESPONSE_MESSAGE(msg) \
@@ -215,10 +214,10 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
     // Then use those to create a switch statement for each thing we would want
     // to report. We use a separate switch statement for each type, because some
     // messages include results for multiple types, like flags and a number.
-    switch (id) {
+    switch (msgId) {
         OPENTHERM_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
     }
-    switch (id) {
+    switch (msgId) {
         OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
     }
 }
@@ -251,7 +250,7 @@ void OpenthermHub::loop() {
 
         unsigned int request = this->build_request(*this->current_message_iterator);
         this->ot->sendRequestAync(request);
-        ESP_LOGD(TAG, "Sent OpenTherm request: %s", String(request, HEX).c_str());
+        ESP_LOGD(TAG, "Sent OpenTherm request with id %d: %s", ot->getDataID(request), String(request, HEX).c_str());
         this->current_message_iterator++;
     }
     this->ot->process();
