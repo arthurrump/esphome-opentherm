@@ -28,6 +28,9 @@ public:
 
     void set_min_value(float min_value) override { this->min_value = min_value; }
     void set_max_value(float max_value) override { this->max_value = max_value; }
+
+    float get_min_value() { return this->min_value; }
+    float get_max_value() { return this->max_value; }
 };
 
 } // namespace opentherm
