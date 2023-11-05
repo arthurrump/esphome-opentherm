@@ -26,7 +26,7 @@ def get_entity_validation_schema(entity: schema.SwitchSchema) -> cv.Schema:
         cv.GenerateID(): cv.declare_id(OpenthermSwitch),
         cv.Optional(CONF_MODE, entity["default_mode"]): 
             cv.enum({
-                "restore_default_on": cg.RawExpression("opentherm::OpenthermSwitchMode::OPENTHERM_SWITCH_RESTORE_DEFAULT_ON"), 
+                "restore_default_on": cg.RawExpression("opentherm::OpenthermSwitchMode::OPENTHERM_SWITCH_RESTORE_DEFAULT_ON"),
                 "restore_default_off": cg.RawExpression("opentherm::OpenthermSwitchMode::OPENTHERM_SWITCH_RESTORE_DEFAULT_OFF"),
                 "start_on": cg.RawExpression("opentherm::OpenthermSwitchMode::OPENTHERM_SWITCH_START_ON"),
                 "start_off": cg.RawExpression("opentherm::OpenthermSwitchMode::OPENTHERM_SWITCH_START_OFF")
@@ -40,7 +40,7 @@ async def to_code(config: Dict[str, Any]) -> None:
         COMPONENT_TYPE, 
         schema.SWITCHES,
         OpenthermSwitch, 
-        generate.create_only_conf(new_openthermswitch), 
+        generate.create_only_conf(new_openthermswitch),
         config
     )
     generate.define_readers(COMPONENT_TYPE, keys)

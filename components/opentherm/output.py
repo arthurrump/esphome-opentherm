@@ -30,10 +30,10 @@ CONFIG_SCHEMA = validate.create_component_schema(schema.INPUTS, get_entity_valid
 
 async def to_code(config: Dict[str, Any]) -> None:
     keys = await generate.component_to_code(
-        COMPONENT_TYPE, 
+        COMPONENT_TYPE,
         schema.INPUTS,
-        OpenthermOutput, 
-        new_openthermoutput, 
+        OpenthermOutput,
+        new_openthermoutput,
         config
     )
     generate.define_readers(COMPONENT_TYPE, keys)

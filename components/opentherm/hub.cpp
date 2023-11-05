@@ -182,7 +182,7 @@ unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
     return 0;
 }
 
-OpenthermHub::OpenthermHub(void(*handle_interrupt_callback)(void), void(*process_response_callback)(unsigned long, OpenThermResponseStatus)) 
+OpenthermHub::OpenthermHub(void(*handle_interrupt_callback)(void), void(*process_response_callback)(unsigned long, OpenThermResponseStatus))
     : Component(), handle_interrupt_callback(handle_interrupt_callback), process_response_callback(process_response_callback) {
 }
 

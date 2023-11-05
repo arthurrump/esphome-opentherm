@@ -21,9 +21,9 @@ CONFIG_SCHEMA = validate.create_component_schema(schema.SENSORS, get_entity_vali
 
 async def to_code(config: Dict[str, Any]) -> None:
     await generate.component_to_code(
-        COMPONENT_TYPE, 
+        COMPONENT_TYPE,
         schema.SENSORS,
-        sensor.Sensor, 
-        generate.create_only_conf(sensor.new_sensor), 
+        sensor.Sensor,
+        generate.create_only_conf(sensor.new_sensor),
         config
     )

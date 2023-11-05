@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     next_version = input("Enter the version number for the new release: ")
     major, minor, patch = parse_version(next_version)
-    
+
     update_changelog(changelog, next_version)
 
     os.system('git add CHANGELOG.md')

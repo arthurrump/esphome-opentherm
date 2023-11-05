@@ -101,7 +101,7 @@ protected:
 
     // Callbacks to pass to OpenTherm interface for globally defined interrupts
     void(*handle_interrupt_callback)();
-	void(*process_response_callback)(unsigned long, OpenThermResponseStatus);
+    void(*process_response_callback)(unsigned long, OpenThermResponseStatus);
 
 public:
     // Constructor with references to the global interrupt handlers
@@ -154,7 +154,7 @@ public:
     void set_cooling_enable(bool cooling_enable) { this->cooling_enable = cooling_enable; }
     void set_otc_active(bool otc_active) { this->otc_active = otc_active; }
     void set_ch2_active(bool ch2_active) { this->ch2_active = ch2_active; }
-    
+
     float get_setup_priority() const override{
         return setup_priority::HARDWARE;
     }
