@@ -40,9 +40,32 @@ Then you can define the OpenTherm hub in your configuration:
 
 ```yaml
 opentherm:
+  master_id: 5
   in_pin: 4
   out_pin: 5
+  ch_enable: true
+  dhw_enable: true
+  cooling_enable: false
+  otc_active: false
+  ch2_active: false
+  sync_mode: false
 ```
+<!-- BEGIN schema_docs:usage -->
+- `master_id`: Some boilers require a master meber ID before functioning properly.
+ Defaults to *5*
+- `ch_enable`: Central Heating enabled
+  Defaults to *True*
+- `dhw_enable`: Domestic Hot Water enabled
+  Defaults to *True*
+- `cooling_enable`: Cooling enabled
+  Defaults to *False*
+- `otc_active`: Outside temperature compensation active
+  Defaults to *False*
+- `ch2_active`: Central Heating 2 active
+  Defaults to *False*
+- `sync_mode`: Synchronous communication mode prevents other components from disabling interrupts whilst communicating with the boiler. Enable if you experience random intermittent invalid response errors. Very likely to happen while using Dallas temperature sensors.
+  Defaults to *False*
+<!-- END schema_docs:usage -->
 
 ### Usage as a thermostat
 
