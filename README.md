@@ -76,7 +76,7 @@ The most important function for a thermostat is to set the boiler temperature se
 There are three ways to set an input value:
 
 - As an input sensor, defined in the hub configuration:
-  
+
   ```yaml
   opentherm:
     t_set: setpoint_sensor
@@ -89,7 +89,7 @@ There are three ways to set an input value:
 
   This can be useful if you have an external thermostat-like device that provides the setpoint as a sensor.
 - As a number:
-  
+
   ```yaml
   number:
     - platform: opentherm
@@ -99,14 +99,14 @@ There are three ways to set an input value:
 
   This is useful if you want full control over your boiler and want to manually set all values.
 - As an output:
-  
+
   ```yaml
   output:
     - platform: opentherm
       t_set:
         id: setpoint
   ```
-  
+
   This is especially useful in combination with the PID Climate component:
 
   ```yaml
@@ -126,39 +126,39 @@ For the output and number variants, there are four more properties you can confi
 The following inputs are available:
 
 <!-- BEGIN schema_docs:input -->
-- `t_set`: Control setpoint: temperature setpoint for the boiler's supply water (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 100  
-  Supports `auto_max_value`
-- `t_set_ch2`: Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 100  
-  Supports `auto_max_value`
-- `cooling_control`: Cooling control signal (%)  
-  Default `min_value`: 0  
+- `t_set`: Control setpoint: temperature setpoint for the boiler's supply water (°C)
+  Default `min_value`: 0
   Default `max_value`: 100
-- `t_dhw_set`: Domestic hot water temperature setpoint (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
-  Supports `auto_min_value`  
   Supports `auto_max_value`
-- `max_t_set`: Maximum allowable CH water setpoint (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
-  Supports `auto_min_value`  
+- `t_set_ch2`: Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit (°C)
+  Default `min_value`: 0
+  Default `max_value`: 100
   Supports `auto_max_value`
-- `t_room_set`: Current room temperature setpoint (informational) (°C)  
-  Default `min_value`: -40  
+- `cooling_control`: Cooling control signal (%)
+  Default `min_value`: 0
+  Default `max_value`: 100
+- `t_dhw_set`: Domestic hot water temperature setpoint (°C)
+  Default `min_value`: 0
   Default `max_value`: 127
-- `t_room_set_ch2`: Current room temperature setpoint on CH2 (informational) (°C)  
-  Default `min_value`: -40  
+  Supports `auto_min_value`
+  Supports `auto_max_value`
+- `max_t_set`: Maximum allowable CH water setpoint (°C)
+  Default `min_value`: 0
   Default `max_value`: 127
-- `t_room`: Current sensed room temperature (informational) (°C)  
-  Default `min_value`: -40  
+  Supports `auto_min_value`
+  Supports `auto_max_value`
+- `t_room_set`: Current room temperature setpoint (informational) (°C)
+  Default `min_value`: -40
   Default `max_value`: 127
-- `max_rel_mod_level`: Maximum relative modulation level (%)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
+- `t_room_set_ch2`: Current room temperature setpoint on CH2 (informational) (°C)
+  Default `min_value`: -40
+  Default `max_value`: 127
+- `t_room`: Current sensed room temperature (informational) (°C)
+  Default `min_value`: -40
+  Default `max_value`: 127
+- `max_rel_mod_level`: Maximum relative modulation level (%)
+  Default `min_value`: 0
+  Default `max_value`: 127
   Supports `auto_min_value`
 <!-- END schema_docs:input -->
 
@@ -186,15 +186,15 @@ The last point ensures that central heating is not enabled if no heating is requ
 The following switches are available:
 
 <!-- BEGIN schema_docs:switch -->
-- `ch_enable`: Central Heating enabled  
+- `ch_enable`: Central Heating enabled
   Defaults to *True*
-- `dhw_enable`: Domestic Hot Water enabled  
+- `dhw_enable`: Domestic Hot Water enabled
   Defaults to *True*
-- `cooling_enable`: Cooling enabled  
+- `cooling_enable`: Cooling enabled
   Defaults to *False*
-- `otc_active`: Outside temperature compensation active  
+- `otc_active`: Outside temperature compensation active
   Defaults to *False*
-- `ch2_active`: Central Heating 2 active  
+- `ch2_active`: Central Heating 2 active
   Defaults to *False*
 <!-- END schema_docs:switch -->
 
