@@ -50,8 +50,8 @@ opentherm:
   ch2_active: false
   sync_mode: false
 ```
-<!-- BEGIN schema_docs:usage -->
-- `master_id`: Some boilers require a master meber ID before functioning properly.
+
+- `master_id`: Some boilers require a master member ID before functioning properly.
  Defaults to *5*
 - `ch_enable`: Central Heating enabled
   Defaults to *True*
@@ -65,7 +65,6 @@ opentherm:
   Defaults to *False*
 - `sync_mode`: Synchronous communication mode prevents other components from disabling interrupts whilst communicating with the boiler. Enable if you experience random intermittent invalid response errors. Very likely to happen while using Dallas temperature sensors.
   Defaults to *False*
-<!-- END schema_docs:usage -->
 
 ### Usage as a thermostat
 
