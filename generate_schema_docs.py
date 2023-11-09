@@ -5,7 +5,7 @@ import re
 import components.opentherm.schema as schema
 
 LINESEP = "\n"
-MD_LINEBREAK = "  \n"
+MD_LINEBREAK = "\n"
 
 README = "README.md"
 
