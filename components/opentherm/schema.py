@@ -2,7 +2,13 @@
 # inputs of the OpenTherm component.
 
 from typing import Dict, Generic, Tuple, TypeVar, TypedDict
-from typing_extensions import NotRequired
+
+# NotRequired was moved to typing in Python 3.11
+# as long as ESPHome supports Python < 3.11, we need to allow both imports
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing_extensions import NotRequired
 
 from esphome.const import (
     UNIT_CELSIUS,
