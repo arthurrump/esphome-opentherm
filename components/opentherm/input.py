@@ -9,6 +9,7 @@ CONF_min_value = "min_value"
 CONF_max_value = "max_value"
 CONF_auto_min_value = "auto_min_value"
 CONF_auto_max_value = "auto_max_value"
+CONF_step = "step"
 
 OpenthermInput = generate.opentherm_ns.class_("OpenthermInput")
 
@@ -26,6 +27,8 @@ def input_schema(entity: schema.InputSchema) -> cv.Schema:
         schema = schema.extend({ cv.Optional(CONF_auto_min_value, False): cv.boolean })
     if CONF_auto_max_value in entity:
         schema = schema.extend({ cv.Optional(CONF_auto_max_value, False): cv.boolean })
+    if CONF_step in entity:
+        schema = schema.extend({ cv.Optional(CONF_step, False): cv.float_ })
     schema = schema.add_extra(validate_min_value_less_than_max_value)
     return schema
 
