@@ -654,6 +654,20 @@ SWITCHES: Schema[SwitchSchema] = Schema({
         "message_data": "flag8_hb_4",
         "default_mode": "restore_default_off"
     }),
+    "sm_active": SwitchSchema({
+        "description": "Summer mode active",
+        "message": "Status",
+        "keep_updated": True,
+        "message_data": "flag8_hb_5",
+        "default_mode": "restore_default_off"
+    }),
+    "dhw_block": SwitchSchema({
+        "description": "DHW Blocking",
+        "message": "Status",
+        "keep_updated": True,
+        "message_data": "flag8_hb_6",
+        "default_mode": "restore_default_off"
+    }),
 })
 
 class AutoConfigure(TypedDict):

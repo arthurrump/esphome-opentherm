@@ -125,22 +125,37 @@ unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
                 true
             #endif
             ;
-        bool ch2_active = 
+        bool ch2_active =
             this->ch2_active
-            && 
+            &&
             #ifdef OPENTHERM_READ_ch2_active
                 OPENTHERM_READ_ch2_active
             #else
                 true
-            #endif 
-            && 
+            #endif
+            &&
             #ifdef OPENTHERM_READ_t_set_ch2
                 OPENTHERM_READ_t_set_ch2 > 0.0
             #else
                 true
             #endif
             ;
-        return ot->buildSetBoilerStatusRequest(ch_enable, dhw_enable, cooling_enable, otc_active, ch2_active);
+        bool sm_active =
+            #ifdef OPENTHERM_READ_sm_active
+                OPENTHERM_READ_sm_active
+            #else
+                false
+            #endif
+            ;
+        bool dhw_block =
+            #ifdef OPENTHERM_READ_dhw_block
+                OPENTHERM_READ_dhw_block
+            #else
+                false
+            #endif
+            ;
+        ESP_LOGD(TAG, "Building sm active: %d - DHW Block: %d", sm_active, dhw_block);
+        return ot->buildSetBoilerStatusRequest(ch_enable, dhw_enable, cooling_enable, otc_active, ch2_active,sm_active, dhw_block);
     }
 
     // Next, we start with the write requests from switches and other inputs,
