@@ -19,7 +19,7 @@ public:
     void set_id(const char* id) { this->id = id; }
 
     void write_state(float state) override {
-        this->state = state < 0.003 && this->zero_means_zero_ ? 0.0 : clamp(state * 100, min_value, max_value);
+        this->state = state < 0.003 && this->zero_means_zero_ ? 0.0 : clamp(state * (max_value - min_value) + min_value, min_value, max_value);
         this->has_state_ = true;
         ESP_LOGD("opentherm.output", "Output set to %.2f", this->state);
     };
