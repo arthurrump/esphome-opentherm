@@ -668,6 +668,13 @@ SWITCHES: Schema[SwitchSchema] = Schema({
         "message_data": "flag8_hb_6",
         "default_mode": "restore_default_off"
     }),
+    "lock_out_reset": SwitchSchema({
+        "description": "Boiler Lock-out Reset",
+        "message": "Command",
+        "keep_updated": True,
+        "message_data": "flag8_hb_1",
+        "default_mode": "restore_default_off"
+    }),
 })
 
 class AutoConfigure(TypedDict):
