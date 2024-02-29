@@ -369,7 +369,7 @@ SENSORS: Schema[SensorSchema] = Schema({
         "accuracy_decimals": 0,
         "icon": "mdi:fan",
         "state_class": STATE_CLASS_MEASUREMENT,
-        "message": "BoilerFanSpeed",
+        "message": "BoilerFanSpeedSetpointAndActual",
         "keep_updated": True,
         "message_data": "u16",
     }),
