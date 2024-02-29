@@ -3,10 +3,13 @@
 
 esphome:
   name: thermostat-number-minimal
+  platformio_options:
+    lib_deps:
+    - https://github.com/freebear-nc/opentherm_library.git
 
 external_components:
   # Replace with a direct reference to GitHub in your own configuration
-  #source: github://arthurrump/esphome-opentherm@main
+  #source: github://freebear-nc/esphome-opentherm@main
   source: 
     type: local
     path: ../components

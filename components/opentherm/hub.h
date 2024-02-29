@@ -62,6 +62,8 @@ class OpenthermHub : public Component {
 protected:
     // Communication pins for the OpenTherm interface
     int in_pin, out_pin;
+    // Master id for MConfigMMemberIDcode command
+    int master_id = 0;
     // The OpenTherm interface from @ihormelnyk's library
     OpenTherm* ot;
 
@@ -99,7 +101,7 @@ protected:
 
     // Callbacks to pass to OpenTherm interface for globally defined interrupts
     void(*handle_interrupt_callback)();
-	void(*process_response_callback)(unsigned long, OpenThermResponseStatus);
+    void(*process_response_callback)(unsigned long, OpenThermResponseStatus);
 
 public:
     // Constructor with references to the global interrupt handlers
@@ -114,6 +116,7 @@ public:
     // Setters for the input and output OpenTherm interface pins
     void set_in_pin(int in_pin) { this->in_pin = in_pin; }
     void set_out_pin(int out_pin) { this->out_pin = out_pin; }
+    void set_master_id(int master_id) { this->master_id = master_id; }
 
     #define OPENTHERM_SET_SENSOR(entity) void set_ ## entity(sensor::Sensor* sensor) { this->entity = sensor; }
     OPENTHERM_SENSOR_LIST(OPENTHERM_SET_SENSOR, )
@@ -145,13 +148,19 @@ public:
     // or using a switch. ch_enable and dhw_enable default to true, the others to false.
     bool ch_enable = true, dhw_enable = true, cooling_enable, otc_active, ch2_active;
 
+    // Synchronous communication mode prevents other components from disabling interrupts while
+    // we are talking to the boiler. Enable if you experience random intermittent invalid response errors.
+    // Very likely to happen while using Dallas temperature sensors.
+    bool sync_mode = false;
+
     // Setters for the status variables
     void set_ch_enable(bool ch_enable) { this->ch_enable = ch_enable; }
     void set_dhw_enable(bool dhw_enable) { this->dhw_enable = dhw_enable; }
     void set_cooling_enable(bool cooling_enable) { this->cooling_enable = cooling_enable; }
     void set_otc_active(bool otc_active) { this->otc_active = otc_active; }
     void set_ch2_active(bool ch2_active) { this->ch2_active = ch2_active; }
-    
+    void set_sync_mode(bool sync_mode) { this->sync_mode = sync_mode; }
+
     float get_setup_priority() const override{
         return setup_priority::HARDWARE;
     }

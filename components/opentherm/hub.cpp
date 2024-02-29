@@ -34,8 +34,8 @@ namespace message_data {
     uint16_t parse_u16(const unsigned long response) { return (uint16_t) (response & 0xffff); }
     int16_t parse_s16(const unsigned long response) { return (int16_t) (response & 0xffff); }
     float parse_f88(const unsigned long response) {
-        unsigned int data = response & 0xffff;
-        return (data & 0x8000) ? -(0x10000L - data) / 256.0f : data / 256.0f; 
+        int16_t data = response & 0xffff;
+        return (data / 256.0f);
     }
 
     unsigned int write_flag8_lb_0(const bool value, const unsigned int data) { return value ? data | 0b0000000000000001 : data & 0b1111111111111110; }
@@ -67,6 +67,10 @@ namespace message_data {
 #define OPENTHERM_IGNORE_2(x, y)
 
 unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
+    if (request_id == OpenThermMessageID::MConfigMMemberIDcode) {
+        ESP_LOGD(TAG, "Building Member Config request with id %d", this->master_id);
+        return ot->buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::MConfigMMemberIDcode, this->master_id);
+    }
     // First, handle the status request. This requires special logic, because we
     // wouldn't want to inadvertently disable domestic hot water, for example.
     // It is also included in the macro-generated code below, but that will
@@ -121,22 +125,37 @@ unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
                 true
             #endif
             ;
-        bool ch2_active = 
+        bool ch2_active =
             this->ch2_active
-            && 
+            &&
             #ifdef OPENTHERM_READ_ch2_active
                 OPENTHERM_READ_ch2_active
             #else
                 true
-            #endif 
-            && 
+            #endif
+            &&
             #ifdef OPENTHERM_READ_t_set_ch2
                 OPENTHERM_READ_t_set_ch2 > 0.0
             #else
                 true
             #endif
             ;
-        return ot->buildSetBoilerStatusRequest(ch_enable, dhw_enable, cooling_enable, otc_active, ch2_active);
+        bool sm_active =
+            #ifdef OPENTHERM_READ_sm_active
+                OPENTHERM_READ_sm_active
+            #else
+                false
+            #endif
+            ;
+        bool dhw_block =
+            #ifdef OPENTHERM_READ_dhw_block
+                OPENTHERM_READ_dhw_block
+            #else
+                false
+            #endif
+            ;
+        ESP_LOGD(TAG, "Building sm active: %d - DHW Block: %d", sm_active, dhw_block);
+        return ot->buildSetBoilerStatusRequest(ch_enable, dhw_enable, cooling_enable, otc_active, ch2_active,sm_active, dhw_block);
     }
 
     // Next, we start with the write requests from switches and other inputs,
@@ -166,6 +185,8 @@ unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
         return ot->buildRequest(OpenThermMessageType::READ_DATA, request_id, 0);
     switch (request_id) {
         OPENTHERM_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_READ_MESSAGE, OPENTHERM_IGNORE_2, , , )
+    }
+    switch (request_id) {
         OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_READ_MESSAGE, OPENTHERM_IGNORE_2, , , )
     }
 
@@ -176,7 +197,7 @@ unsigned int OpenthermHub::build_request(OpenThermMessageID request_id) {
     return 0;
 }
 
-OpenthermHub::OpenthermHub(void(*handle_interrupt_callback)(void), void(*process_response_callback)(unsigned long, OpenThermResponseStatus)) 
+OpenthermHub::OpenthermHub(void(*handle_interrupt_callback)(void), void(*process_response_callback)(unsigned long, OpenThermResponseStatus))
     : Component(), handle_interrupt_callback(handle_interrupt_callback), process_response_callback(process_response_callback) {
 }
 
@@ -185,20 +206,20 @@ void IRAM_ATTR OpenthermHub::handle_interrupt() {
 }
 
 void OpenthermHub::process_response(unsigned long response, OpenThermResponseStatus status) {
+    OpenThermMessageID msgId = ot->getDataID(response);
+
     // First check if the response is valid and short-circuit execution if it isn't.
     if (!ot->isValidResponse(response)) {
         ESP_LOGW(
             TAG, 
-            "Received invalid OpenTherm response: %s, status=%s", 
-            String(response, HEX).c_str(),
-            String(ot->getLastResponseStatus()).c_str()
+            "Received invalid OpenTherm response (id: %u): %08x, status=%s, type=%s", msgId, response,
+            ot->statusToString(ot->getLastResponseStatus()),
+            ot->messageTypeToString(ot->getMessageType(response))
         );
         return;
     }
 
-    // Read the second byte of the response, which is the message id.
-    byte id = (response >> 16 & 0xFF);
-    ESP_LOGD(TAG, "Received OpenTherm response with id %d: %s", id, String(response, HEX).c_str());
+    ESP_LOGD(TAG, "Received OpenTherm response with id %d: %s", msgId, String(response, HEX).c_str());
 
     // Define the handler helpers to publish the results to all sensors
     #define OPENTHERM_MESSAGE_RESPONSE_MESSAGE(msg) \
@@ -212,10 +233,10 @@ void OpenthermHub::process_response(unsigned long response, OpenThermResponseSta
     // Then use those to create a switch statement for each thing we would want
     // to report. We use a separate switch statement for each type, because some
     // messages include results for multiple types, like flags and a number.
-    switch (id) {
+    switch (msgId) {
         OPENTHERM_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
     }
-    switch (id) {
+    switch (msgId) {
         OPENTHERM_BINARY_SENSOR_MESSAGE_HANDLERS(OPENTHERM_MESSAGE_RESPONSE_MESSAGE, OPENTHERM_MESSAGE_RESPONSE_ENTITY, , OPENTHERM_MESSAGE_RESPONSE_POSTSCRIPT, )
     }
 }
@@ -225,6 +246,7 @@ void OpenthermHub::setup() {
     this->ot = new OpenTherm(this->in_pin, this->out_pin, false);
     this->ot->begin(this->handle_interrupt_callback, this->process_response_callback);
 
+    this->add_initial_message(OpenThermMessageID::MConfigMMemberIDcode);
     // Ensure that there is at least one request, as we are required to
     // communicate at least once every second. Sending the status request is
     // good practice anyway.
@@ -247,11 +269,21 @@ void OpenthermHub::loop() {
         }
 
         unsigned int request = this->build_request(*this->current_message_iterator);
-        this->ot->sendRequestAync(request);
-        ESP_LOGD(TAG, "Sent OpenTherm request: %s", String(request, HEX).c_str());
+        if (this->sync_mode)
+        {
+            ESP_LOGD(TAG, "Sending SYNC OpenTherm request with id %d: %s", ot->getDataID(request), String(request, HEX).c_str());
+            this->ot->sendRequest(request);
+        }
+        else
+        {
+            this->ot->sendRequestAync(request);
+            ESP_LOGD(TAG, "Sent OpenTherm request with id %d: %s", ot->getDataID(request), String(request, HEX).c_str());
+        }
         this->current_message_iterator++;
     }
-    this->ot->process();
+
+    if (!this->sync_mode)
+      this->ot->process();
 }
 
 #define ID(x) x

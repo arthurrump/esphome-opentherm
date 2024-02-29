@@ -2,11 +2,19 @@
 # inputs of the OpenTherm component.
 
 from typing import Dict, Generic, Tuple, TypeVar, TypedDict
-from typing_extensions import NotRequired
+
+# NotRequired was moved to typing in Python 3.11
+# as long as ESPHome supports Python < 3.11, we need to allow both imports
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing_extensions import NotRequired
 
 from esphome.const import (
     UNIT_CELSIUS,
     UNIT_PERCENT,
+    UNIT_KILOWATT,
+    UNIT_EMPTY,
     DEVICE_CLASS_COLD,
     DEVICE_CLASS_HEAT,
     DEVICE_CLASS_PRESSURE,
@@ -14,6 +22,7 @@ from esphome.const import (
     DEVICE_CLASS_TEMPERATURE,
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_NONE,
 )
 
 T = TypeVar("T")
@@ -34,14 +43,14 @@ class EntitySchema(TypedDict):
 
     message_data: str
     """Instructions on how to interpret the data in the message
-      - flag8_[hb|lb]_[0-7]: data is a byte of single bit flags, 
+      - flag8_[hb|lb]_[0-7]: data is a byte of single bit flags,
                              this flag is set in the high (hb) or low byte (lb),
                              at position 0 to 7
-      - u8_[hb|lb]: data is an unsigned 8-bit integer, 
+      - u8_[hb|lb]: data is an unsigned 8-bit integer,
                     in the high (hb) or low byte (lb)
-      - s8_[hb|lb]: data is an signed 8-bit integer, 
+      - s8_[hb|lb]: data is an signed 8-bit integer,
                     in the high (hb) or low byte (lb)
-      - f88: data is a signed fixed point value with 
+      - f88: data is a signed fixed point value with
               1 sign bit, 7 integer bits, 8 fractional bits
       - u16: data is an unsigned 16-bit integer
       - s16: data is a signed 16-bit integer
@@ -287,6 +296,24 @@ SENSORS: Schema[SensorSchema] = Schema({
         "keep_updated": False,
         "message_data": "s8_lb",
     }),
+    "otc_ratio_ub": SensorSchema({
+        "description": "Upper bound of OTC curve",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "message": "HcratioUBHcratioLB",
+        "keep_updated": False,
+        "message_data": "s8_ub",
+    }),
+    "otc_ratio_lb": SensorSchema({
+        "description": "Lower bound of OTC curve",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "message": "HcratioUBHcratioLB",
+        "keep_updated": False,
+        "message_data": "s8_lb",
+    }),
     "t_dhw_set": SensorSchema({
         "description": "Domestic hot water temperature setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
@@ -306,6 +333,125 @@ SENSORS: Schema[SensorSchema] = Schema({
         "message": "MaxTSet",
         "keep_updated": True,
         "message_data": "f88",
+    }),
+    "otc_hc_ratio": SensorSchema({
+        "description": "OTC heat curve ratio",
+        "unit_of_measurement": UNIT_CELSIUS,
+        "accuracy_decimals": 2,
+        "device_class": DEVICE_CLASS_TEMPERATURE,
+        "state_class": STATE_CLASS_MEASUREMENT,
+        "message": "Hcratio",
+        "keep_updated": True,
+        "message_data": "f88",
+    }),
+    "oem_fault_code": SensorSchema({
+        "description": "OEM fault code",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "u8_lb",
+    }),
+    "t_heat_exchanger": SensorSchema({
+        "description": "Boiler heat exchanger temperature",
+        "unit_of_measurement": UNIT_CELSIUS,
+        "accuracy_decimals": 0,
+        "device_class": DEVICE_CLASS_TEMPERATURE,
+        "state_class": STATE_CLASS_MEASUREMENT,
+        "message": "TheatExchanger",
+        "keep_updated": True,
+        "message_data": "s16",
+    }),
+    "boiler_fan_speed": SensorSchema({
+        "description": "Boiler fan speed",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "icon": "mdi:fan",
+        "state_class": STATE_CLASS_MEASUREMENT,
+        "message": "BoilerFanSpeedSetpointAndActual",
+        "keep_updated": True,
+        "message_data": "u16",
+    }),
+    "boiler_flame_current": SensorSchema({
+        "description": "Boiler flame current (uA)",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 2,
+        "state_class": STATE_CLASS_NONE,
+        "message": "BoilerFlameCurrent",
+        "keep_updated": True,
+        "message_data": "f88",
+    }),
+    "oem_diagnostic_code": SensorSchema({
+        "description": "OEM diagnostic code",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "message": "OEMDiagnosticCode",
+        "keep_updated": True,
+        "message_data": "u16",
+    }),
+    "max_capacity": SensorSchema({
+        "description": "Maximum boiler capacity (KW)",
+        "unit_of_measurement": UNIT_KILOWATT,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_MEASUREMENT,
+        "disabled_by_default": True,
+        "message": "MaxCapacityMinModLevel",
+        "keep_updated": False,
+        "message_data": "u8_hb",
+    }),
+    "min_mod_level": SensorSchema({
+        "description": "Minimum modulation level",
+        "unit_of_measurement": UNIT_PERCENT,
+        "accuracy_decimals": 0,
+        "icon": "mdi:percent",
+        "disabled_by_default": True,
+        "state_class": STATE_CLASS_MEASUREMENT,
+        "message": "MaxCapacityMinModLevel",
+        "keep_updated": False,
+        "message_data": "u8_lb",
+    }),
+    "opentherm_version_slave": SensorSchema({
+        "description": "Version of OpenTherm implemented by slave",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "disabled_by_default": True,
+        "message": "OpenThermVersionSlave",
+        "keep_updated": False,
+        "message_data": "f88",
+    }),
+    "slave_type": SensorSchema({
+        "description": "Slave product type",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "disabled_by_default": True,
+        "message": "SlaveVersion",
+        "keep_updated": False,
+        "message_data": "u8_hb",
+    }),
+    "slave_version": SensorSchema({
+        "description": "Slave product version",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "disabled_by_default": True,
+        "message": "SlaveVersion",
+        "keep_updated": False,
+        "message_data": "u8_lb",
+    }),
+
+    "slave_id": SensorSchema({
+        "description": "Slave ID code",
+        "unit_of_measurement": UNIT_EMPTY,
+        "accuracy_decimals": 0,
+        "state_class": STATE_CLASS_NONE,
+        "disabled_by_default": True,
+        "message": "SConfigSMemberIDcode",
+        "keep_updated": False,
+        "message_data": "u8_lb",
     }),
 })
 
@@ -427,6 +573,46 @@ BINARY_SENSORS: Schema = Schema({
         "keep_updated": False,
         "message_data": "flag8_lb_1",
     }),
+    "service_request": BinarySensorSchema({
+        "description": "Service Request",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_0",
+    }),
+    "lockout_reset": BinarySensorSchema({
+        "description": "Lockout Reset",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_1",
+    }),
+    "low_water_pressure": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Low Water Pressure",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_2",
+    }),
+    "flame_fault": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Gas/Flame Fault",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_3",
+    }),
+    "air_pressure_fault": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Air Pressure Fault",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_4",
+    }),
+    "water_over_temperature": BinarySensorSchema({
+        "device_class": DEVICE_CLASS_PROBLEM,
+        "description": "Water Over Temperature",
+        "message": "ASFflags",
+        "keep_updated": True,
+        "message_data": "flag8_hb_5",
+    }),
 })
 
 class SwitchSchema(EntitySchema):
@@ -468,6 +654,27 @@ SWITCHES: Schema[SwitchSchema] = Schema({
         "message_data": "flag8_hb_4",
         "default_mode": "restore_default_off"
     }),
+    "sm_active": SwitchSchema({
+        "description": "Summer mode active",
+        "message": "Status",
+        "keep_updated": True,
+        "message_data": "flag8_hb_5",
+        "default_mode": "restore_default_off"
+    }),
+    "dhw_block": SwitchSchema({
+        "description": "DHW Blocking",
+        "message": "Status",
+        "keep_updated": True,
+        "message_data": "flag8_hb_6",
+        "default_mode": "restore_default_off"
+    }),
+    "lock_out_reset": SwitchSchema({
+        "description": "Boiler Lock-out Reset",
+        "message": "Command",
+        "keep_updated": True,
+        "message_data": "flag8_hb_1",
+        "default_mode": "restore_default_off"
+    }),
 })
 
 class AutoConfigure(TypedDict):
@@ -476,6 +683,7 @@ class AutoConfigure(TypedDict):
 
 class InputSchema(EntitySchema):
     unit_of_measurement: str
+    step: float
     range: Tuple[int, int]
     auto_max_value: NotRequired[AutoConfigure]
     auto_min_value: NotRequired[AutoConfigure]
@@ -484,6 +692,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "t_set": InputSchema({
         "description": "Control setpoint: temperature setpoint for the boiler's supply water",
         "unit_of_measurement": UNIT_CELSIUS,
+        "step": 0.1,
         "message": "TSet",
         "keep_updated": True,
         "message_data": "f88",
@@ -493,6 +702,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "t_set_ch2": InputSchema({
         "description": "Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit",
         "unit_of_measurement": UNIT_CELSIUS,
+        "step": 0.1,
         "message": "TsetCH2",
         "keep_updated": True,
         "message_data": "f88",
@@ -502,6 +712,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "cooling_control": InputSchema({
         "description": "Cooling control signal",
         "unit_of_measurement": UNIT_PERCENT,
+        "step": 1.0,
         "message": "CoolingControl",
         "keep_updated": True,
         "message_data": "f88",
@@ -510,6 +721,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "t_dhw_set": InputSchema({
         "description": "Domestic hot water temperature setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
+        "step": 0.1,
         "message": "TdhwSet",
         "keep_updated": True,
         "message_data": "f88",
@@ -520,6 +732,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "max_t_set": InputSchema({
         "description": "Maximum allowable CH water setpoint",
         "unit_of_measurement": UNIT_CELSIUS,
+        "step": 0.1,
         "message": "MaxTSet",
         "keep_updated": True,
         "message_data": "f88",
@@ -530,6 +743,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "t_room_set": InputSchema({
         "description": "Current room temperature setpoint (informational)",
         "unit_of_measurement": UNIT_CELSIUS,
+        "step": 0.1,
         "message": "TrSet",
         "keep_updated": True,
         "message_data": "f88",
@@ -538,6 +752,7 @@ INPUTS: Schema[InputSchema] = Schema({
     "t_room_set_ch2": InputSchema({
         "description": "Current room temperature setpoint on CH2 (informational)",
         "unit_of_measurement": UNIT_CELSIUS,
+        "step": 0.1,
         "message": "TrSetCH2",
         "keep_updated": True,
         "message_data": "f88",
@@ -546,9 +761,21 @@ INPUTS: Schema[InputSchema] = Schema({
     "t_room": InputSchema({
         "description": "Current sensed room temperature (informational)",
         "unit_of_measurement": UNIT_CELSIUS,
+        "step": 0.1,
         "message": "Tr",
         "keep_updated": True,
         "message_data": "f88",
         "range": (-40, 127),
+    }),
+    "max_rel_mod_level": InputSchema({
+        "description": "Maximum relative modulation level",
+        "unit_of_measurement": UNIT_PERCENT,
+        "step": 0.1,
+        "icon": "mdi:percent",
+        "message": "MaxRelModLevelSetting",
+        "keep_updated": True,
+        "message_data": "f88",
+        "range": (0, 127),
+        "auto_min_value": { "message": "MaxCapacityMinModLevel", "message_data": "u8_lb" },
     }),
 })

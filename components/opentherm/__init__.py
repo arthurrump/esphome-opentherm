@@ -15,11 +15,13 @@ CONFIG_SCHEMA = cv.All(
         cv.GenerateID(): cv.declare_id(generate.OpenthermHub),
         cv.Optional("in_pin", 4): cv.int_,
         cv.Optional("out_pin", 5): cv.int_,
+        cv.Optional("master_id", 5): cv.int_,
         cv.Optional("ch_enable", True): cv.boolean,
         cv.Optional("dhw_enable", True): cv.boolean,
         cv.Optional("cooling_enable", False): cv.boolean,
         cv.Optional("otc_active", False): cv.boolean,
         cv.Optional("ch2_active", False): cv.boolean,
+        cv.Optional("sync_mode", False): cv.boolean,
     }).extend(validate.create_entities_schema(schema.INPUTS, (lambda _: cv.use_id(sensor.Sensor))))
       .extend(cv.COMPONENT_SCHEMA),
     cv.only_with_arduino,
@@ -51,4 +53,5 @@ async def to_code(config: Dict[str, Any]) -> None:
         generate.define_readers(const.INPUT_SENSOR, input_sensors)
         generate.add_messages(var, input_sensors, schema.INPUTS)
 
-    cg.add_library("ihormelnyk/OpenTherm Library", "1.1.3")
+# Use the freebear-nc forked version of OpenTherm library.
+#    cg.add_library("ihormelnyk/OpenTherm Library", "1.1.4")

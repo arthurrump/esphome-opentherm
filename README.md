@@ -4,7 +4,7 @@ An external ESPHome component to control a boiler (or other supported HVAC appli
 
 We aim for maximum flexibility in this component by exposing most of the information available through the OpenTherm protocol, while allowing all configuration in YAML. (No custom component code required!) Since every boiler and every situation is different, you have to play around a bit with the sensors you'd want to read. There is no requirement for a boiler to support everything in the protocol, so not every sensor in this component will work with your boiler. (For example, my Remeha Avanta does not report `ch_pressure`, `dhw_flow_rate` or `t_dhw`.) <!-- #2: We try to be smart about this and not send request messages for these if the boiler consistently indicates it doesn't understand the message or the data is unavailable. You'll find warning messages indicating this behaviour in the ESPHome logs. -->
 
-This component uses [@ihormelnyk's OpenTherm Library](https://github.com/ihormelnyk/opentherm_library) (MIT licensed) as its communication layer. The message loop is inspired by code for the [DIYLESS ESP32 Wi-Fi Thermostat](https://github.com/diyless/esp32-wifi-thermostat) (MIT licensed).
+This component uses [@FreeBear-nc's OpenTherm Library](https://github.com/freebear-nc/opentherm_library) (MIT licensed) (a fork of [@ihormelnyk's OpenTherm Library](https://github.com/ihormelnyk/opentherm_library)) as its communication layer. The message loop is inspired by code for the [DIYLESS ESP32 Wi-Fi Thermostat](https://github.com/diyless/esp32-wifi-thermostat) (MIT licensed).
 
 Alternatives:
 - [ESPHome-OpenTherm by @rsciriano](https://github.com/rsciriano/ESPHome-OpenTherm), a custom component based on the same library as this project
@@ -22,7 +22,16 @@ The OpenTherm Master component is available as an external component in ESPHome 
 
 ```yaml
 external_components:
-  source: github://arthurrump/esphome-opentherm@main
+  source: github://freebear-nc/esphome-opentherm@main
+```
+
+A forked version of [@ihormelnyk's OpenTherm Library](https://github.com/ihormelnyk/opentherm_library) is also required:
+
+```yaml
+esphome:
+  platformio_options:
+    lib_deps:
+    - https://github.com/freebear-nc/opentherm_library.git
 ```
 
 This references the main branch, which is cool if you want to stay up to date, but may also break your configuration if breaking changes happen here. A better idea would be to reference a specific version, see the tags for available versions. Instead of a specific version, you could also choose to follow a major version by specifying `@v1` etc.
@@ -31,9 +40,31 @@ Then you can define the OpenTherm hub in your configuration:
 
 ```yaml
 opentherm:
+  master_id: 5
   in_pin: 4
   out_pin: 5
+  ch_enable: true
+  dhw_enable: true
+  cooling_enable: false
+  otc_active: false
+  ch2_active: false
+  sync_mode: false
 ```
+
+- `master_id`: Some boilers require a master member ID before functioning properly.
+ Defaults to *5*
+- `ch_enable`: Central Heating enabled
+  Defaults to *True*
+- `dhw_enable`: Domestic Hot Water enabled
+  Defaults to *True*
+- `cooling_enable`: Cooling enabled
+  Defaults to *False*
+- `otc_active`: Outside temperature compensation active
+  Defaults to *False*
+- `ch2_active`: Central Heating 2 active
+  Defaults to *False*
+- `sync_mode`: Synchronous communication mode prevents other components from disabling interrupts whilst communicating with the boiler. Enable if you experience random intermittent invalid response errors. Very likely to happen while using Dallas temperature sensors.
+  Defaults to *False*
 
 ### Usage as a thermostat
 
@@ -44,7 +75,7 @@ The most important function for a thermostat is to set the boiler temperature se
 There are three ways to set an input value:
 
 - As an input sensor, defined in the hub configuration:
-  
+
   ```yaml
   opentherm:
     t_set: setpoint_sensor
@@ -57,7 +88,7 @@ There are three ways to set an input value:
 
   This can be useful if you have an external thermostat-like device that provides the setpoint as a sensor.
 - As a number:
-  
+
   ```yaml
   number:
     - platform: opentherm
@@ -67,14 +98,14 @@ There are three ways to set an input value:
 
   This is useful if you want full control over your boiler and want to manually set all values.
 - As an output:
-  
+
   ```yaml
   output:
     - platform: opentherm
       t_set:
         id: setpoint
   ```
-  
+
   This is especially useful in combination with the PID Climate component:
 
   ```yaml
@@ -94,36 +125,40 @@ For the output and number variants, there are four more properties you can confi
 The following inputs are available:
 
 <!-- BEGIN schema_docs:input -->
-- `t_set`: Control setpoint: temperature setpoint for the boiler's supply water (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 100  
-  Supports `auto_max_value`
-- `t_set_ch2`: Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 100  
-  Supports `auto_max_value`
-- `cooling_control`: Cooling control signal (%)  
-  Default `min_value`: 0  
+- `t_set`: Control setpoint: temperature setpoint for the boiler's supply water (°C)
+  Default `min_value`: 0
   Default `max_value`: 100
-- `t_dhw_set`: Domestic hot water temperature setpoint (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
-  Supports `auto_min_value`  
   Supports `auto_max_value`
-- `max_t_set`: Maximum allowable CH water setpoint (°C)  
-  Default `min_value`: 0  
-  Default `max_value`: 127  
-  Supports `auto_min_value`  
+- `t_set_ch2`: Control setpoint 2: temperature setpoint for the boiler's supply water on the second heating circuit (°C)
+  Default `min_value`: 0
+  Default `max_value`: 100
   Supports `auto_max_value`
-- `t_room_set`: Current room temperature setpoint (informational) (°C)  
-  Default `min_value`: -40  
+- `cooling_control`: Cooling control signal (%)
+  Default `min_value`: 0
+  Default `max_value`: 100
+- `t_dhw_set`: Domestic hot water temperature setpoint (°C)
+  Default `min_value`: 0
   Default `max_value`: 127
-- `t_room_set_ch2`: Current room temperature setpoint on CH2 (informational) (°C)  
-  Default `min_value`: -40  
+  Supports `auto_min_value`
+  Supports `auto_max_value`
+- `max_t_set`: Maximum allowable CH water setpoint (°C)
+  Default `min_value`: 0
   Default `max_value`: 127
-- `t_room`: Current sensed room temperature (informational) (°C)  
-  Default `min_value`: -40  
+  Supports `auto_min_value`
+  Supports `auto_max_value`
+- `t_room_set`: Current room temperature setpoint (informational) (°C)
+  Default `min_value`: -40
   Default `max_value`: 127
+- `t_room_set_ch2`: Current room temperature setpoint on CH2 (informational) (°C)
+  Default `min_value`: -40
+  Default `max_value`: 127
+- `t_room`: Current sensed room temperature (informational) (°C)
+  Default `min_value`: -40
+  Default `max_value`: 127
+- `max_rel_mod_level`: Maximum relative modulation level (%)
+  Default `min_value`: 0
+  Default `max_value`: 127
+  Supports `auto_min_value`
 <!-- END schema_docs:input -->
 
 ### Switch
@@ -150,15 +185,21 @@ The last point ensures that central heating is not enabled if no heating is requ
 The following switches are available:
 
 <!-- BEGIN schema_docs:switch -->
-- `ch_enable`: Central Heating enabled  
+- `ch_enable`: Central Heating enabled
   Defaults to *True*
-- `dhw_enable`: Domestic Hot Water enabled  
+- `dhw_enable`: Domestic Hot Water enabled
   Defaults to *True*
-- `cooling_enable`: Cooling enabled  
+- `cooling_enable`: Cooling enabled
   Defaults to *False*
-- `otc_active`: Outside temperature compensation active  
+- `otc_active`: Outside temperature compensation active
   Defaults to *False*
-- `ch2_active`: Central Heating 2 active  
+- `ch2_active`: Central Heating 2 active
+  Defaults to *False*
+- `sm_active`: Summer mode active
+  Defaults to *False*
+- `dhw_block`: DHW Blocking
+  Defaults to *False*
+- `lock_out_reset`: Boiler Lock-out Reset
   Defaults to *False*
 <!-- END schema_docs:switch -->
 
@@ -184,6 +225,12 @@ The component can report boiler status on several binary sensors. The *Status* s
 - `max_ch_setpoint_transfer_enabled`: Remote boiler parameters: CH maximum setpoint transfer enabled
 - `dhw_setpoint_rw`: Remote boiler parameters: DHW setpoint read/write
 - `max_ch_setpoint_rw`: Remote boiler parameters: CH maximum setpoint read/write
+- `service_request`: Service Request
+- `lockout_reset`: Lockout Reset
+- `low_water_pressure`: Low Water Pressure
+- `flame_fault`: Gas/Flame Fault
+- `air_pressure_fault`: Air Pressure Fault
+- `water_over_temperature`: Water Over Temperature
 <!-- END schema_docs:binary_sensor -->
 
 ### Sensor
@@ -215,8 +262,22 @@ The boiler can also report several numerical values, which are available through
 - `t_dhw_set_lb`: Lower bound for adjustment of DHW setpoint (°C)
 - `max_t_set_ub`: Upper bound for adjustment of max CH setpoint (°C)
 - `max_t_set_lb`: Lower bound for adjustment of max CH setpoint (°C)
+- `otc_ratio_ub`: Upper bound of OTC curve ()
+- `otc_ratio_lb`: Lower bound of OTC curve ()
 - `t_dhw_set`: Domestic hot water temperature setpoint (°C)
 - `max_t_set`: Maximum allowable CH water setpoint (°C)
+- `otc_hc_ratio`: OTC heat curve ratio (°C)
+- `oem_fault_code`: OEM fault code ()
+- `t_heat_exchanger`: Boiler heat exchanger temperature (°C)
+- `boiler_fan_speed`: Boiler fan speed ()
+- `boiler_flame_current`: Boiler flame current (uA) ()
+- `oem_diagnostic_code`: OEM diagnostic code ()
+- `max_capacity`: Maximum boiler capacity (KW) (kW)
+- `min_mod_level`: Minimum modulation level (%)
+- `opentherm_version_slave`: Version of OpenTherm implemented by slave ()
+- `slave_type`: Slave product type ()
+- `slave_version`: Slave product version ()
+- `slave_id`: Slave ID code ()
 <!-- END schema_docs:sensor -->
 
 ## Troubleshooting

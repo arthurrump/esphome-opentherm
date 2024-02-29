@@ -19,7 +19,7 @@ def define_has_component(component_type: str, keys: List[str]) -> None:
 TSchema = TypeVar("TSchema", bound=schema.EntitySchema)
 
 def define_message_handler(component_type: str, keys: List[str], schema_: schema.Schema[TSchema]) -> None:
-    
+
     # The macros defined here should be able to generate things like this:
     # // Parsing a message and publishing to sensors
     # case OpenthermMessageID::Message:
@@ -83,7 +83,7 @@ def create_only_conf(create: Callable[[Dict[str, Any]], Awaitable[cg.Pvariable]]
 
 async def component_to_code(component_type: str, schema_: schema.Schema[TSchema], type: cg.MockObjClass, create: Create, config: Dict[str, Any]) -> List[str]:
     """Generate the code for each configured component in the schema of a component type.
-    
+
     Parameters:
     - component_type: The type of component, e.g. "sensor" or "binary_sensor"
     - schema_: The schema for that component type, a list of available components

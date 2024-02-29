@@ -1,0 +1,556 @@
+# A work in progress to control a Viessmann Vitodens 050 boiler.
+# Some of the number components are being used to fine tune parameters. These
+# would be removed in a production environment,
+
+esphome:
+  name: "vitodens-050"
+  platformio_options:
+    lib_deps:
+    - https://github.com/freebear-nc/opentherm_library.git
+
+  on_boot:
+    priority: -100
+    then:
+      - number.set:
+          id: t_max_sp
+          value: 55.0
+      - number.set:
+          id: dhw_sp
+          value: 45.0
+      - number.set:
+          id: mod_level_set
+          value: 75.0
+      - climate.control:
+          id: pid_climate
+          mode: "OFF"
+      - switch.turn_off: ch_enable
+      - switch.turn_off: dhw_enable
+
+external_components:
+  # Replace with a direct reference to GitHub in your own configuration
+  source: github://freebear-nc/esphome-opentherm@main
+#  - source: 
+#      type: local
+#      path: ./code/esphome-opentherm/components
+
+esp8266:
+  board: d1_mini
+
+logger:
+# "NONE", "ERROR", "WARN", "INFO", "CONFIG", "DEBUG", "VERBOSE", "VERY_VERBOSE"
+  level: WARN
+  logs:
+    api: WARN
+    binary_sensor: WARN
+    climate: INFO
+    dallas: INFO
+    dallas.sensor: WARN
+    homeassistant.sensor: WARN
+    homeassistant: WARN
+    logger: INFO
+    mdns: INFO
+    number: INFO
+    opentherm: WARN
+#    opentherm.output: DEBUG
+#   output: VERBOSE # This does not return anything !
+#    pid.autotune: VERBOSE
+    pid: INFO
+    sensor: INFO
+    status: INFO
+    template: INFO
+    text_sensor: INFO
+    uptime: INFO
+    wifi: INFO
+
+api:
+
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  manual_ip:
+    static_ip: 192.168.0.125
+    gateway: !secret gateway
+    subnet: 255.255.255.0
+    dns1: "8.8.8.8"
+  power_save_mode: "light"
+
+opentherm:
+# Using the DIYLess OpenTherm shield
+# https://diyless.com/product/master-opentherm-shield
+# Other products available
+  in_pin: 4 # D2
+  out_pin: 5 # D1
+  ch_enable: true
+  dhw_enable: true
+# Outside Temperature Compensation is not used - Default is false/off
+#  otc_active: false
+
+output:
+  - platform: opentherm
+    t_set:
+      id: t_set
+      min_value: 5
+      max_value: 100
+      zero_means_zero: true
+
+number:
+  - platform: opentherm
+    max_t_set:
+      name: "Boiler Max Setpoint"
+      id: t_max_sp
+      entity_category: config
+      min_value: 20.0
+      max_value: 75.0
+      step: 0.1
+
+    t_dhw_set:
+      name: "DHW Setpoint"
+      id: dhw_sp
+      entity_category: config
+      min_value: 5.0
+      max_value: 75.0
+      step: 0.1
+
+    max_rel_mod_level:
+      name: "Maximum Modulation"
+      id: mod_level_set
+      entity_category: config
+      min_value: 0
+      max_value: 100
+      step: 0.1
+
+  - platform: template
+    name: "CH max t_set"
+    id: ch_max_t_set
+    mode: box
+    entity_category: config
+    min_value: 0
+    max_value: 100
+    step: 0.1
+    lambda: "return id(t_set).get_max_value();"
+    set_action:
+      - lambda: "id(t_set).set_max_value(x);"
+
+  - platform: template
+    name: "CH min t_set"
+    id: ch_min_t_set
+    mode: box
+    entity_category: config
+    min_value: 0
+    max_value: 100
+    step: 0.1
+    lambda: "return id(t_set).get_min_value();"
+    set_action:
+      - lambda: "id(t_set).set_min_value(x);"
+
+  - platform: template
+    name: "max integral"
+    id: set_max_integral
+    mode: box
+    entity_category: config
+    min_value: -100
+    max_value: 100
+    step: 0.0001
+    lambda: "return id(pid_climate).get_max_integral();"
+    set_action:
+      - lambda: "id(pid_climate).set_max_integral(x);"
+
+
+  - platform: template
+    name: "PID Proportional"
+    id: thermostat_kp
+    mode: box
+    entity_category: config
+    min_value: 0
+    max_value: 100
+    step: 0.00001
+    lambda: "return id(pid_climate).get_kp();"
+    set_action:
+      - lambda: "id(pid_climate).set_kp(x);"
+
+  - platform: template
+    name: "PID Integral"
+    id: thermostat_ki
+    mode: box
+    entity_category: config
+    min_value: 0
+    max_value: 100
+    step: 0.00001
+    lambda: "return id(pid_climate).get_ki();"
+    set_action:
+      - lambda: "id(pid_climate).set_ki(x);"
+
+  - platform: template
+    name: "PID Derivative"
+    id: thermostat_kd
+    mode: box
+    entity_category: config
+    min_value: 0
+    max_value: 9999
+    step: 0.001
+    lambda: "return id(pid_climate).get_kd();"
+    set_action:
+      - lambda: "id(pid_climate).set_kd(x);"
+
+dallas:
+  - pin: 14 # D5
+
+sensor:
+  - platform: template
+    name: "t_set"
+    id: tset
+    unit_of_measurement: "°C"
+    icon: "mdi:fire"
+    device_class: "temperature"
+    state_class: "measurement"
+    accuracy_decimals: 2
+    update_interval: 10s
+    lambda: return id(t_set).state;
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 10s
+
+  - platform: dallas
+    name: "Cold water temperature"
+    address: 0x6a7c605e1f64ff28
+    resolution: 12
+    filters:
+      - calibrate_linear:
+        - 0.1 -> 0.0
+        - 21.8 -> 22.0
+        - 99.6 -> 100
+  - platform: dallas
+    name: "CH return temperature"
+    address: 0xdab3645e1f64ff28
+    resolution: 12
+    filters:
+      - calibrate_linear:
+        - 0.1 -> 0.0
+        - 21.9 -> 22.0
+        - 99.3 -> 100
+  - platform: dallas
+    name: "DHW temperature"
+    address: 0x26b86a5e1f64ff28
+    resolution: 12
+    filters:
+      - calibrate_linear:
+        - 0.1 -> 0.0
+        - 21.8 -> 22.0
+        - 99.1 -> 100
+  - platform: dallas
+    name: "CH flow temperature"
+    address: 0x02d76a5e1f64ff28
+    resolution: 12
+    filters:
+      - calibrate_linear:
+        - 0.1 -> 0.0
+        - 21.9 -> 22.0
+        - 99.1 -> 100
+
+  - platform: pid
+    name: "PID Climate Result"
+    type: RESULT
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Error"
+    type: ERROR
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Proportional"
+    type: PROPORTIONAL
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Integral"
+    type: INTEGRAL
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Derivative"
+    type: DERIVATIVE
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Heat"
+    type: HEAT
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Kp"
+    type: KP
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Ki"
+    type: KI
+    accuracy_decimals: 6
+  - platform: pid
+    name: "PID Climate Kd"
+    type: KD
+    accuracy_decimals: 6
+
+  - platform: opentherm
+    rel_mod_level:
+
+# Boiler appears to return some bogus values at times.
+# Limit readings to the range of 0 to 127
+      name: "Boiler modulation"
+      id: "modulation"
+      on_raw_value:
+        then:
+          - text_sensor.template.publish:
+              id: viessmann_mod
+              state: !lambda 'return "Modulation: "+std::to_string(x);'
+      filters:
+        - lambda: !lambda |-
+            static float tmp;
+            if (isnan(x)) return {};
+            if (x == 0.0) {
+              tmp = 0;
+              return 0;
+            }
+            std::swap(tmp, x);
+            return (x > 127.0 || x < 0.0) ? 127 : x;
+
+    ch_pressure:
+      name: "Boiler CH pressure"
+      filters:
+        - median:
+            window_size: 7
+            send_every: 4
+            send_first_at: 3
+
+    dhw_flow_rate:
+      name: "Boiler DHW Water flow"
+      on_raw_value:
+        then:
+          - text_sensor.template.publish:
+              id: viessmann_flow
+              state: !lambda 'return "DHW flow: "+std::to_string(x);'
+      filters:
+        - timeout: 10s
+        - lambda: !lambda |-
+            static float tmp;
+            if (isnan(x)) return {};
+            if (x == 0) {
+              tmp = 0;
+              return 0;
+            }
+            std::swap(tmp, x);
+            return x;
+
+    t_boiler:
+      name: "Boiler water temperature"
+      filters:
+        - median:
+            window_size: 7
+            send_every: 4
+            send_first_at: 3
+
+# t_ret doesn't appear to be implemented.
+#    t_ret:
+#      name: "Boiler return temperature"
+#      filters:
+#        - median:
+#            window_size: 7
+#            send_every: 4
+#            send_first_at: 3
+
+    t_dhw:
+      name: "Boiler DHW temperature"
+      filters:
+        - median:
+            window_size: 7
+            send_every: 4
+            send_first_at: 3
+
+    t_exhaust:
+      name: "Boiler Exhaust temperature"
+      filters:
+        - median:
+            window_size: 7
+            send_every: 4
+            send_first_at: 3
+
+    boiler_fan_speed:
+      name: "Boiler fan speed"
+      unit_of_measurement: "rpm"
+      on_raw_value:
+        then:
+          - text_sensor.template.publish:
+              id: viessmann_fan
+              state: !lambda 'return "Fan speed: "+std::to_string(x);'
+      filters:
+        - timeout: 10s
+        - lambda: !lambda |-
+            static float tmp;
+            if (isnan(x)) return {};
+            if (x == 0) {
+              tmp = 0;
+              return 0;
+            }
+            std::swap(tmp, x);
+            return x/60;
+
+    max_capacity:
+      name: "Maximum boiler capacity (KW)"
+    min_mod_level:
+      name: "Minimum modulation level"
+    slave_type:
+      name: "Boiler Type Number"
+    slave_id:
+      name: "Boiler Vendor ID"
+    slave_version:
+      name: "Boiler Version Number"
+    opentherm_version_slave:
+      name: "Slave OT version"
+
+#    oem_fault_code:
+#      name: "Fault Code"
+
+  - platform: homeassistant
+    id: ch_room_temperature
+    entity_id: sensor.hallway_temperature
+    filters: 
+      - sliding_window_moving_average:
+          window_size: 2
+          send_every: 1
+      # Push room temperature few seconds to update PID parameters
+      - heartbeat: 5s
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+  - platform: opentherm
+    fault_indication:
+      name: "Boiler Fault indication"
+    ch_active:
+      name: "Boiler Central Heating active"
+    dhw_active:
+      name: "Boiler Domestic Hot Water active"
+    flame_on:
+      name: "Boiler Flame"
+      id: "flame_on"
+      filters:
+# Try to filter out bogus flame on events.
+      - delayed_on: 15s
+
+    diagnostic_indication:
+      name: "Boiler Diagnostic event"
+#    low_water_pressure:
+#      name: "Low water pressure"
+#    flame_fault:
+#      name: "Flame fault"
+#    water_over_temperature:
+#      name: "Water over temperature"
+
+    dhw_present:
+      name: "DHW present"
+    control_type_on_off:
+      name: "Control Type"
+    master_pump_control_allowed:
+      name: "Pump control allowed"
+
+text_sensor:
+  - platform: version
+    name: "Firmware version"
+
+# Logging components to report on spurious events.
+  - platform: template
+    name: "Viessmann fan"
+    id: viessmann_fan
+  - platform: template
+    name: "Viessmann DHW flow"
+    id: viessmann_flow
+  - platform: template
+    name: "Viessmann modulation"
+    id: viessmann_mod
+
+button:
+  - platform: restart
+    name: "Restart"
+
+  - platform: template
+    name: "PID Climate Autotune"
+    on_press:
+      - climate.pid.set_control_parameters:
+          id: pid_climate
+          kp: 0.0
+          ki: 0.0
+          kd: 0.0
+      - climate.pid.autotune: pid_climate
+
+switch:
+  - platform: opentherm
+    ch_enable:
+      id: ch_enable
+      name: "Boiler Central Heating enabled"
+      restore_mode: ALWAYS_OFF
+
+    dhw_enable:
+      id: dhw_enable
+    # Enable ECO mode, so disable DHW to save gas
+    # DWH will still heat up on demand, just takes a
+    # few seconds longer to get up to temperature.
+    # Without ECO mode, the boiler will fire up every
+    # two hours or so for 30 seconds.
+      name: "Boiler DHW enabled"
+      restore_mode: ALWAYS_OFF
+
+climate:
+  - platform: pid
+    name: "Central heating"
+    id: pid_climate
+    heat_output: t_set
+    default_target_temperature: 16.0
+    visual:
+      min_temperature: 10.0
+      max_temperature: 25.0
+      temperature_step: 0.1
+    sensor: ch_room_temperature
+    control_parameters: 
+# Suggested default: kp: 0.7 ki: 0.003 kd: 0.0
+      kp: 1.14265
+      ki: 0.001
+      # Using high levels of derivative (kd) leads to
+      # instability which manifests as random boiler starts.
+      # Autotune value is way off !
+      kd: 0
+      min_integral: 0
+      max_integral: 0.25
+      starting_integral_term: 0
+      output_averaging_samples: 1
+      derivative_averaging_samples: 5
+    deadband_parameters:
+      threshold_high: 0
+      threshold_low: -0.2
+      kp_multiplier: 0.1
+      ki_multiplier: 0.0
+      kd_multiplier: 0.0
+
+# PID Climate 'Central heating' - Run Oct 28/29th 2023 with +/- 0.25°C deadband
+#
+#   Control Parameters:
+#     kp: 0.97941, ki: 0.00008, kd: 2932.12109, output samples: 5
+#   Deadband Parameters:
+#     threshold: -0.25000 to 0.25000, multipliers(kp: 0.10000, ki: 0.00000, kd: 0.00000), output samples: 1
+#
+#   Calculated PID parameters ("Ziegler-Nichols PID" rule):
+#
+#   control_parameters:
+#     kp: 0.97941
+#     ki: 0.00008
+#     kd: 2932.12109
+#
+#   Please copy these values into your YAML configuration! They will reset on the next reboot.
+#   Oscillation Period: 23950.000000
+#   Oscillation Amplitude: 0.390000
+#   Ku: 1.632357, Pu: 23950.000000
+#   Alternative Rules:
+#     Rule 'Ziegler-Nichols PI':
+#       kp: 0.73456, ki: 0.00004, kd: 0.00000
+#     Rule 'Pessen Integral PID':
+#       kp: 1.14265, ki: 0.00012, kd: 4104.96924
+#     Rule 'Some Overshoot PID':
+#       kp: 0.54357, ki: 0.00005, kd: 4339.53955
+#     Rule 'No Overshoot PID':
+#       kp: 0.32647, ki: 0.00003, kd: 2443.43433

@@ -5,10 +5,13 @@
 
 esphome:
   name: thermostat-pid-complete
+  platformio_options:
+    lib_deps:
+    - https://github.com/freebear-nc/opentherm_library.git
 
 external_components:
   # Replace with a direct reference to GitHub in your own configuration
-  #source: github://arthurrump/esphome-opentherm@main
+  #source: github://freebear/esphome-opentherm@main
   source: 
     type: local
     path: ../components
@@ -29,6 +32,7 @@ captive_portal:
 opentherm:
   in_pin: 4
   out_pin: 5
+  # master_id: 4 # default 0, baxi 4
   ch_enable: true
   dhw_enable: false
   cooling_enable: false
