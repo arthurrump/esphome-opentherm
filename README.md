@@ -1,5 +1,8 @@
 # OpenTherm Master for ESPHome
 
+> [!NOTE]
+> This repository is unmaintained, but thanks to the hard work of [@olegtarasov](https://github.com/olegtarasov), a much improved version lives on in the [OpenTherm component included directly in ESPHome](https://esphome.io/components/opentherm/)! 🎉
+
 An external ESPHome component to control a boiler (or other supported HVAC appliances) over the OpenTherm protocol. Note that special hardware is required, like the [DIYLESS Master OpenTherm Shield](https://diyless.com/product/master-opentherm-shield) or [Ihor Melnyk's OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter). This component acts only as an OpenTherm master (i.e. a thermostat or controller) and not as a slave or gateway. You can no longer use your existing thermostat if you control your boiler through ESPHome with this component.
 
 We aim for maximum flexibility in this component by exposing most of the information available through the OpenTherm protocol, while allowing all configuration in YAML. (No custom component code required!) Since every boiler and every situation is different, you have to play around a bit with the sensors you'd want to read. There is no requirement for a boiler to support everything in the protocol, so not every sensor in this component will work with your boiler. (For example, my Remeha Avanta does not report `ch_pressure`, `dhw_flow_rate` or `t_dhw`.) <!-- #2: We try to be smart about this and not send request messages for these if the boiler consistently indicates it doesn't understand the message or the data is unavailable. You'll find warning messages indicating this behaviour in the ESPHome logs. -->
