@@ -15,6 +15,7 @@ CONFIG_SCHEMA = cv.All(
         cv.GenerateID(): cv.declare_id(generate.OpenthermHub),
         cv.Optional("in_pin", 4): cv.int_,
         cv.Optional("out_pin", 5): cv.int_,
+        cv.Optional("master_id", 5): cv.int_,
         cv.Optional("ch_enable", True): cv.boolean,
         cv.Optional("dhw_enable", True): cv.boolean,
         cv.Optional("cooling_enable", False): cv.boolean,
