@@ -34,8 +34,8 @@ namespace message_data {
     uint16_t parse_u16(const unsigned long response) { return (uint16_t) (response & 0xffff); }
     int16_t parse_s16(const unsigned long response) { return (int16_t) (response & 0xffff); }
     float parse_f88(const unsigned long response) {
-        unsigned int data = response & 0xffff;
-        return (data & 0x8000) ? -(0x10000L - data) / 256.0f : data / 256.0f; 
+        int32_t data = response & 0xffff;
+        return (data & 0x8000)? -(0x10000 - data) / 256.0f : data / 256.0f; 
     }
 
     unsigned int write_flag8_lb_0(const bool value, const unsigned int data) { return value ? data | 0b0000000000000001 : data & 0b1111111111111110; }
